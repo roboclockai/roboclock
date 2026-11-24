@@ -1,0 +1,14 @@
+{
+  "usd_layers": 156,
+  "missing_internal_references": [],
+  "external_or_runtime_dependencies": [
+    "/opt/household/assets/lightwheel_kitchen/Collected_KitchenRoom/Kitchen_Other/Kitchen_Orange001.usd",
+    "OmniPBR.mdl"
+  ],
+  "transitive_resources_included": [
+    "b_kitchen_v3/assets/pot_body.usda",
+    "b_kitchen_v3/assets/mini_fridge.usda",
+    "b_kitchen_v3/assets/milk_carton.usda",
+    "b_kitchen_v3/assets/lid.usda"
+  ]
+}

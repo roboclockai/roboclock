@@ -1,0 +1,23 @@
+{
+  "source": "assets/5/5/5.obj",
+  "selections": {
+    "office_computer": [
+      "qingmo_010bd9fc_f603_47f5_b3ce_8a98c2256cfb",
+      "qingmo_c057b0ec_d18e_46d9_8fc4_e5008e4461d8",
+      "qingmo_012a30bb_0c47_4f20_bc4b_8a3ffa163ab4",
+      "qingmo_f30ab84a_db97_4838_a919_be86544b2aa6",
+      "qingmo_62db0ba2_62e6_4f35_809f_84a6d2aa7c90",
+      "qingmo_44700bf0_0943_4c68_9d97_bea1739c0e68",
+      "qingmo_ac84957a_4f76_4024_95d9_3a60b368c38c"
+    ],
+    "office_chair": [
+      "qingmo_5f027e74_1260_45b7_811a_55938b555c36",
+      "qingmo_19f225ca_f561_4d9e_9f4e_0372e52e69f8",
+      "qingmo_655a788f_3bcd_44e7_975f_df463896437f"
+    ],
+    "marble_slab": [
+      "Good_027"
+    ]
+  },
+  "description": "Pack 5 original mesh selections, separate normalized roots."
+}

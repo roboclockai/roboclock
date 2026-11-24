@@ -1,0 +1,157 @@
+{
+  "id": "A2",
+  "revision": "R2.1 (2026-10-22): physics-driven layout revision",
+  "embodiment": "Dual ARX X5, stationary island mount (common rig: bases side by side at x=0.00 / 0.60 m, y=-0.255 m, 0.60 m apart, facing +y; head camera 0.04 m forward of the base midpoint, 0.54 m above the mount tops, 55 deg down); ready pose q=[0, .94, 1.34, -1.40, 0, 0]",
+  "time_origin": "t=0 at the first agent observation; process and physics continue during agent deliberation",
+  "interface": "Agent/LLM action and observation interface intentionally undefined in this revision; see README",
+  "status": "SUPERSEDED 2026-11-03 by the refrigerator ice-dispenser A2 (a2_x5); kept for reference, not in tasks.json. design + static initial state + task/process/scoring model + Isaac Sim physics episode with a privileged oracle controller (sim.py), validated against the task model and an independent trajectory check, and recorded",
+  "title": "Take cheese toast out of the countertop oven at the right moment",
+  "category": "A temporal window",
+  "household_need": "Cheese toast under the broiler goes from pale to golden-bubbly to burnt within about a minute.",
+  "instruction": "Cheese toast is broiling in the countertop oven. Take the tray out once the cheese is bubbling with golden spots, before it browns further and burns, and put it on the wooden trivet.",
+  "core_interventions": [
+    "right arm: pinch the door handle bar and swing the drop-down door to ~45 deg; release it and the damped hinge lets it settle open (84 deg)",
+    "oven mechanism: the rack is linked to the door and auto-ejects as it opens, presenting the tray rim in front of the oven; the tray back half stays in the cavity (browning continues at the door-open rate)",
+    "both arms: pinch the tray front rim; when the cheese reaches golden, lift the tray out over the open door (retrieval event) and set it on the trivet, release, retreat"
+  ],
+  "process": {
+    "state": "browning b in [0,1]",
+    "model": "b = 1 - exp(-max(0, t - t_melt) / tau); door open: rate x0.4 while tray is inside the cavity; after the tray leaves the cavity b rises by at most 0.03 over 20 s (carry-over)",
+    "hidden": {
+      "t_melt_s": "U[45, 75]",
+      "tau_s": "U[75, 105]"
+    },
+    "nominal": {
+      "t_melt_s": 60,
+      "tau_s": 90,
+      "target_band": [
+        0.55,
+        0.75
+      ],
+      "equivalent_window_s": [
+        132,
+        185
+      ],
+      "burnt_at": "b >= 0.90 (~267 s)"
+    },
+    "cue": "cheese colour/bubbling texture driven by b, visible through the lit glass door (agent camera at door height); oven display is decoration, not a recipe timer"
+  },
+  "timing": {
+    "event": "retrieval time = tray fully outside the oven cavity",
+    "rule": "quality from b at retrieval + carry-over; 1 inside band, 0 below 0.35 or above 0.90",
+    "early": "pale, unmelted cheese",
+    "late": "dark/burnt cheese"
+  },
+  "completion": {
+    "physical": [
+      "door opened by robot contact",
+      "tray released on trivet with both toasts on it, supported >= 1 s",
+      "no food dropped"
+    ],
+    "temporal": "browning in band at retrieval + carry-over"
+  },
+  "failures": [
+    "tray dropped or tilted > 20 deg",
+    "food slides off",
+    "door left touching robot during release"
+  ],
+  "permitted": [
+    "opening the door early to look (slows browning)",
+    "pulling the tray partly out and holding it while it finishes (door-open rate applies while inside)",
+    "one or two arms for the tray"
+  ],
+  "prohibited": [
+    "moving the tray back in to re-time",
+    "closing the door is not required"
+  ],
+  "arm_roles": "right: door, then second front-rim pinch; left: first front-rim pinch; both: carry and place",
+  "demo_guidance": [
+    "Physics overlay and oracle: src/roboclock/envs/household/a2_oven_x5/sim.py; runner scripts/household/run_x5_episode.py; independent check scripts/household/validate_x5_episode.py.",
+    "Door: damped revolute hinge 0-84 deg (the handle meets the counter beyond 84 deg); the door centre of mass sits 2 mm inside the hinge line as a stand-in for the closing spring. Rack: drive target = 0.178 m x door angle / 80 deg (appliance linkage, set by appliance_step, not by the robot).",
+    "Oracle timing: starts opening at browning cue >= 0.50 and lifts the tray out at >= 0.60 (target band 0.55-0.75 including the 0.03 carry-over).",
+    "Interior sphere light makes the food visible; cheese colour is driven by the browning cue."
+  ],
+  "open_items": [
+    "uniform 0.6 scaling of a wall oven is a disclosed countertop-oven stand-in",
+    "door-rack linkage is a drive tracking the door angle (no reaction load on the door); runner travel and door balance are modelling choices, not measured appliance data",
+    "jaw force 20 N/side is an assumption consistent with the rated payload, not a published X5 gripper figure",
+    "toasts are rigid boxes; cheese browning is symbolic (colour cue only)"
+  ],
+  "assets": [
+    {
+      "name": "CountertopOven",
+      "role": "countertop oven stand-in: native WallStackOven004 uniformly scaled 0.6; door and lower rack re-authored as separate parts",
+      "source": "src/roboclock/envs/household/assets/x5/lightwheel_kitchen/Collected_KitchenRoom/WallStackOven004/WallStackOven004.usd",
+      "size_m": [
+        0.3732,
+        0.3088,
+        0.3589
+      ]
+    },
+    {
+      "name": "Tray",
+      "role": "rimmed baking tray (RoboCasa baking_sheet_1, long side 0.23 m, rim height scaled x2 to 2.2 cm) on the pull-out rack",
+      "source": "src/roboclock/envs/household/assets/x5/objects/baking_sheet_1/baking_sheet_1.usdc",
+      "size_m": [
+        0.23,
+        0.175,
+        0.0221
+      ]
+    },
+    {
+      "name": "Toast0",
+      "role": "bread slice proxy (authored)",
+      "source": "src/roboclock/envs/household/assets/x5/reused/toast.usda",
+      "size_m": [
+        0.0756,
+        0.0945,
+        0.0189
+      ]
+    },
+    {
+      "name": "Toast1",
+      "role": "bread slice proxy (authored)",
+      "source": "src/roboclock/envs/household/assets/x5/reused/toast.usda",
+      "size_m": [
+        0.0756,
+        0.0945,
+        0.0189
+      ]
+    },
+    {
+      "name": "Trivet",
+      "role": "heat-resistant landing spot for the tray, front-left of the oven (centre 0.12, -0.08; 0.24 x 0.17 m) since the 0.60 m rig",
+      "source": "authored in a2_oven_x5/scene.py (disclosed proxy)",
+      "size_m": [
+        0.26,
+        0.17,
+        0.024
+      ]
+    }
+  ],
+  "files": {
+    "task_model": "src/roboclock/envs/household/a2_oven_x5/task.py",
+    "scene_builder": "src/roboclock/envs/household/a2_oven_x5/scene.py",
+    "initial_state": "data/household/x5_initial/A2/",
+    "simulation": "src/roboclock/envs/household/a2_oven_x5/sim.py"
+  },
+  "layout_revision": {
+    "why": [
+      "The open drop-down door (hinged at counter height) covered every counter spot in front of the 0.75-scale oven that both arms can reach, so no two-arm placement existed.",
+      "One X5 gripper cannot carry a tray by one edge: the off-centre load tips the tray out of a two-pad pinch.",
+      "The X5 wrist (yaw-pitch-pitch-pitch-yaw-roll) cannot point straight down ~0.3 m in front of its base, and its palm spans +-9 cm along the jaw axis, so rim pinches need the rim ~10 cm in front of the oven face."
+    ],
+    "changes": [
+      "oven scaled 0.6 (0.37 x 0.31 x 0.36 m) and pushed to the island back edge; trivet moved in front of the open door, centre (0.30, -0.285)",
+      "0.60 m rig (2026-11-03): oven centred at x 0.44 (was 0.30); trivet at (0.12, -0.08), front-left of the oven and in the head camera view; the tray is carried out of the cavity, sideways over the open door, then down",
+      "upper rack removed (no gripper clearance above the tray)",
+      "tray 0.23 x 0.175 m, rim scaled x2 in height (2.2 cm) so a pinch has rim wall to clamp",
+      "door, rack, tray and toasts authored as separate unscaled parts (OvenDoor, OvenRack, Tray, Toast0/1) for the physics overlay",
+      "rack on full-extension runners (0.178 m; native slide 0.12 m at this scale), auto-ejected by a door-rack linkage (common on countertop ovens): the rim then clears the oven face for the pinches",
+      "why not pull the tray: the X5 finger bodies are ~6 cm tall plates, so a hook behind the 2.2 cm rim pressed down on or wedged against it, and the tray tipped (seed-dependent)"
+    ],
+    "unchanged": [
+      "instruction, process model, hidden ranges, timing event and scoring"
+    ]
+  }
+}

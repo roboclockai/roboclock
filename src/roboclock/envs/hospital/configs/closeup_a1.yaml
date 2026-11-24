@@ -1,0 +1,348 @@
+# Closeup of the A1 vial pad for judging the bottle model.
+sim:
+  physics_dt: 0.004
+  control_decimation: 5
+  camera_resolution:
+  - 960
+  - 720
+  settle_seconds: 0.5
+  placement_dwell: 0.2
+scene:
+  table_height: 0.75
+  table_center:
+  - 0.45
+  - 0.0
+  - 0.7
+  table_size:
+  - 1.0
+  - 1.1
+  - 0.1
+  robot_position:
+  - 0.0
+  - 0.0
+  - 0.75
+  camera_position:
+  - 0.78
+  - -0.02
+  - 1.02
+  camera_look_at:
+  - 0.3
+  - -0.23
+  - 0.8
+  camera_focal_length: 30.0
+  camera_horizontal_aperture: 36.0
+  spatial_jitter: 0.05
+  clutter:
+    enabled: true
+    count: 8
+    seed_offset: 202
+    source_clearance: 0.045
+    target_clearance: 0.045
+    pair_clearance: 0.012
+  mass_range:
+  - 0.035
+  - 0.075
+  friction_range:
+  - 0.6
+  - 1.0
+  light_intensity_range:
+  - 1800
+  - 2600
+visuals:
+  hdr_path: shared://hdr/studio_small_09_2k.hdr
+  hdr_intensity: 140.0
+  hdr_rotation: 35.0
+  key_intensity: 280.0
+  fill_intensity: 90.0
+  labels: true
+  ceiling_intensity: 90.0
+  beacon_intensity: 600.0
+  renderer: RaytracedLighting
+  path_tracing_samples: 512
+  path_tracing_spp: 8
+  path_tracing_bounces: 8
+  render_updates: 72
+  materials:
+    worktop:
+      texture_set: epoxy
+      uv_scale:
+      - 1.0
+      - 1.0
+      normal_strength: 0.18
+      roughness_map_weight: 0.5
+    steel:
+      texture_set: brushed_steel
+      uv_scale:
+      - 2.0
+      - 2.0
+      normal_strength: 0.2
+      roughness_map_weight: 0.65
+    aluminum:
+      texture_set: brushed_steel
+      uv_scale:
+      - 3.0
+      - 3.0
+      normal_strength: 0.15
+      roughness_map_weight: 0.45
+    polymer:
+      texture_set: powder_coat
+      uv_scale:
+      - 2.0
+      - 2.0
+      normal_strength: 0.18
+      roughness_map_weight: 0.5
+    wall:
+      texture_set: painted_plaster_wall
+      uv_scale:
+      - 0.5
+      - 0.5
+      normal_strength: 0.15
+      roughness_map_weight: 0.6
+      tint:
+      - 0.84
+      - 0.91
+      - 0.98
+    floor:
+      texture_set: grey_tiles
+      uv_scale:
+      - 0.75
+      - 0.75
+      normal_strength: 0.15
+      roughness_map_weight: 0.7
+physics:
+  contact_offset: 0.001
+  rest_offset: 0.0
+  solver_position_iterations: 16
+  solver_velocity_iterations: 4
+  minimum_grasp_time: 0.04
+  contact_force_threshold: 0.06
+  relative_hold_speed: 0.2
+  recovery_dwell: 0.3
+  catch_dwell: 0.25
+robot:
+  # Dual ARX X5 (roboclock.envs.lab.robot). Hospital tasks drive the left arm; its default mount is
+  # the former single-arm base at scene.robot_position. Tasks with far items move it forward so
+  # every item and target stays within the X5's ~0.7 m reach, and the idle right arm is moved off
+  # fixtures that cover its default spot (the B2 patient/AED, the C2 crash cart).
+  model: dual_arx_x5
+  mount_positions: [[0.0, 0.0, 1.05], [0.0, 0.38, 1.05]]
+  task_mount_positions:
+    A1: [[0.15, 0.0, 1.05], [0.0, 0.38, 1.05]]
+    B2: [[0.15, 0.05, 1.05], [0.84, 0.49, 1.05]]
+    B3: [[0.15, -0.10, 1.05], [0.0, 0.38, 1.05]]
+    C1: [[0.10, 0.0, 1.05], [0.0, 0.38, 1.05]]
+    C2: [[0.15, -0.10, 1.05], [0.0, -0.40, 1.05]]
+    C3: [[0.15, -0.05, 1.05], [0.0, 0.38, 1.05]]
+control:
+  max_cartesian_speed: 0.35
+  insertion_speed: 0.07
+  reactive_speed: 0.65
+  # Target lead over the measured joints per control period. The drives lag by
+  # kd/kp = 0.04 s, so the arm settles at speed * (1 - exp(-T/0.04)), about 1.13 rad/s.
+  joint_target_speed: 2.9
+  phase_timeout: 10.0
+difficulty:
+  easy:
+    orientation_tolerance: 0.3
+  medium:
+    orientation_tolerance: 0.2
+  hard:
+    orientation_tolerance: 0.12
+episode:
+  max_time: 120.0
+  window_start_range:
+  - 8.0
+  - 12.0
+  event_time_range:
+  - 4.0
+  - 10.0
+tasks:
+  A1:
+    num_items_range:
+    - 3
+    - 4
+    easy:
+      window_width:
+      - 10.0
+      - 12.0
+      window_gap:
+      - 7.0
+      - 9.0
+    medium:
+      window_width:
+      - 6.0
+      - 8.0
+      window_gap:
+      - 6.0
+      - 8.0
+    hard:
+      window_width:
+      - 3.5
+      - 4.5
+      window_gap:
+      - 5.0
+      - 6.0
+  A2:
+    num_items_range:
+    - 1
+    - 1
+    easy:
+      transit_limit:
+      - 14.0
+      - 18.0
+    medium:
+      transit_limit:
+      - 9.0
+      - 12.0
+    hard:
+      transit_limit:
+      - 6.0
+      - 8.0
+  A3:
+    num_items_range:
+    - 1
+    - 1
+    easy:
+      window_width:
+      - 10.0
+      - 12.0
+    medium:
+      window_width:
+      - 5.0
+      - 7.0
+    hard:
+      window_width:
+      - 2.5
+      - 3.5
+  A4:
+    num_items_range:
+    - 1
+    - 1
+    easy:
+      expiry_time:
+      - 50.0
+      - 60.0
+    medium:
+      expiry_time:
+      - 32.0
+      - 40.0
+    hard:
+      expiry_time:
+      - 20.0
+      - 26.0
+  B1:
+    num_items_range:
+    - 3
+    - 3
+    easy:
+      response_limit:
+      - 14.0
+      - 18.0
+    medium:
+      response_limit:
+      - 9.0
+      - 12.0
+    hard:
+      response_limit:
+      - 6.0
+      - 8.0
+  B2:
+    num_items_range:
+    - 3
+    - 3
+    completion_deadline: null
+    easy:
+      response_limit:
+      - 3.5
+      - 4.5
+    medium:
+      response_limit:
+      - 2.0
+      - 3.0
+    hard:
+      response_limit:
+      - 0.8
+      - 1.5
+  B3:
+    num_items_range:
+    - 3
+    - 3
+    cover_radius: 0.045
+    easy:
+      response_limit:
+      - 50.0
+      - 56.0
+    medium:
+      response_limit:
+      - 42.0
+      - 46.0
+    hard:
+      response_limit:
+      - 34.0
+      - 38.0
+  C1:
+    num_items_range:
+    - 16
+    - 24
+    required_accuracy: 0.95
+    easy:
+      required_rate_per_min:
+      - 2.5
+      - 3.0
+    medium:
+      required_rate_per_min:
+      - 4.0
+      - 5.0
+    hard:
+      required_rate_per_min:
+      - 6.0
+      - 7.0
+  C2:
+    num_items_range:
+    - 16
+    - 24
+    required_accuracy: null
+    easy:
+      required_rate_per_min:
+      - 2.5
+      - 3.0
+    medium:
+      required_rate_per_min:
+      - 4.0
+      - 5.0
+    hard:
+      required_rate_per_min:
+      - 6.0
+      - 7.0
+  C3:
+    num_items_range:
+    - 12
+    - 18
+    required_accuracy: null
+    easy:
+      cycle_time:
+      - 100.0
+      - 110.0
+      required_rate_per_min:
+      - 2.5
+      - 3.0
+    medium:
+      cycle_time:
+      - 80.0
+      - 90.0
+      required_rate_per_min:
+      - 4.0
+      - 4.5
+    hard:
+      cycle_time:
+      - 60.0
+      - 70.0
+      required_rate_per_min:
+      - 5.0
+      - 6.0
+  C4:  # blood-tube triage (ward profile only); placeholder so every profile validates
+    num_items_range: [6, 6]
+    required_accuracy: null
+    easy: {cycle_time: [80.0, 90.0], required_rate_per_min: [0.5, 0.5]}
+    medium: {cycle_time: [68.0, 76.0], required_rate_per_min: [0.5, 0.5]}
+    hard: {cycle_time: [58.0, 64.0], required_rate_per_min: [0.5, 0.5]}

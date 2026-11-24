@@ -1,0 +1,10 @@
+# Calibration only: sports C3 ball service with every demand due at the start.
+#   python -m roboclock eval --env sports --task C3 --policy oracle --oracle \
+#     --config src/roboclock/envs/sports/configs/c3_eager.yaml ...
+# All 6 demands are owed from t = 0.05 s, so each ball is fired as soon as it is accepted and
+# the oracle never waits for a free hopper cell: the accepted times (job_times_s) are its own
+# stocking pace, the input of the C3 hard schedule (ball_service/config.py). Any other C3 run
+# (benchmark, demos) must use benchmark.yaml; the override is recorded in the native config
+# as service.schedule_override.
+base: benchmark.yaml
+c3_schedule: {preparation: 0.0, firing_interval: 0.01, horizon: 60.0}

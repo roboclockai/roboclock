@@ -1,0 +1,21 @@
+{
+  "dual_arx_x5": {
+    "source": "https://github.com/ARXroboticsX/ARX_Model",
+    "commit": "74386441845f12af4da203843b6400951d6c5530",
+    "entry": "X5/X5A/urdf/X5A.urdf",
+    "conversion": "scripts/sports/prepare_arx_x5_official.py",
+    "file_sha256": {
+      "meshes/base_link.STL": "898dbe3af3a98857358ac5a3d74e085ec9c69946737e767dad139776761cbd92",
+      "meshes/link1.STL": "04a52b86a5b28c847377a9167e7effab0478fa591052e83b0b32cf8709bb3885",
+      "meshes/link2.STL": "2865da6a962c814abaf9251497bcf5f5e3b67610e3b657ddcaa9de8b3d45e83e",
+      "meshes/link3.STL": "3ac2411b0cbffcf4808cae4c215cfeab607f240cd124eeba209ac7986ac047c0",
+      "meshes/link4.STL": "3447ddef920c22e4607b887e1cc588037dfb51c37825c4cac86a5391425469c4",
+      "meshes/link5.STL": "934b3e70ce2987f8de999de29d8ef72c8370dced8e9fdf6f9ddd3e7e24c1e464",
+      "meshes/link6.STL": "32dca4ededcf3215163207b9aea1046114ae59921555d1e068ee46fa6e53915e",
+      "meshes/link7.STL": "f21213e7eab04ac757646c145af56677e6e16a8355249ed0b71a2b79209e92b6",
+      "meshes/link8.STL": "3cde01e375769351782d62fa980cf79f28cd10051cc2b405961e66f380be12c2",
+      "urdf/X5A.urdf": "ecd3febce6afdf32a43ad1ba7dcb35da0b16953b93ff01c347af0679779ab9f1"
+    },
+    "license": "No standalone asset license in manufacturer repository; download locally, do not vendor binaries."
+  }
+}

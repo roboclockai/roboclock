@@ -1,0 +1,421 @@
+sim:
+  physics_dt: 0.004
+  control_decimation: 5
+  camera_resolution:  # head camera (policy rgb); must equal robodojo_rig.HEAD_CAMERA resolution
+  - 640
+  - 480
+  settle_seconds: 0.5
+  placement_dwell: 0.2
+scene:
+  table_height: 0.75
+  table_center:
+  - 0.45
+  - 0.0
+  - 0.7
+  table_size:
+  - 1.0
+  - 1.1
+  - 0.1
+  robot_position:
+  - 0.0
+  - 0.0
+  - 0.75
+  camera_position:
+  - 1.65
+  - 1.4
+  - 2.15
+  camera_look_at:
+  - 0.45
+  - -0.04
+  - 1.03
+  camera_focal_length: 21.0
+  camera_horizontal_aperture: 36.0
+  spatial_jitter: 0.05
+  bedside_spatial_jitter: 0.025
+  bedside_ward_usd: assets/hospital/ward_02_preview_left.usdc  # the preview's true left bay (counter, sink, shelves)
+  bedside_ward_light: 3.0  # scales the ward window, ceiling panels and HDR fill (bedside/ward.py)
+  bedside_camera_position: [1.30, 1.45, 1.65]
+  bedside_camera_look_at: [0.45, -0.10, 0.97]
+  clutter:
+    enabled: true
+    count: 8
+    seed_offset: 202
+    source_clearance: 0.045
+    target_clearance: 0.045
+    pair_clearance: 0.012
+  mass_range:
+  - 0.035
+  - 0.075
+  friction_range:
+  - 0.6
+  - 1.0
+  light_intensity_range:
+  - 1800
+  - 2600
+visuals:
+  # RTX exposure (tonemapper film ISO). Every task sets its own tasks.<ID>.film_iso, chosen on
+  # 2026-11-17 so the head camera's mean luma at reset is ~158/255, like lab (155) and household (161).
+  # The former 100-250 (set before the RoboDojo rig spec added ambient light and indirect diffuse)
+  # left the ward at a mean of 194-229 with up to 14 % of the head image clipped.
+  # 2026-11-18: ground light x0.3 and every ISO x1.6 (user: between the old glare and the 0.3-only
+  # render) -> head mean ~150-165, contrast kept, nothing clipped.
+  film_iso: 96
+  # Isaac's add_default_ground_plane() brings a 100000-nit SphereLight that dominated the ward
+  # (flat, glaring whites). 2026-11-18: scaled to 0.3 -> head mean luma ~120-140 at the same ISO,
+  # with shading kept; the ward's rect/dome lights barely change the image (probe B1/A2/C3).
+  ground_light_scale: 0.3
+  hdr_path: shared://hdr/studio_small_09_2k.hdr
+  hdr_intensity: 140.0
+  hdr_rotation: 35.0
+  key_intensity: 280.0
+  fill_intensity: 90.0
+  labels: true
+  ceiling_intensity: 90.0
+  beacon_intensity: 600.0
+  renderer: RaytracedLighting  # robodojo_rig.RENDER_MODE; backend applies RENDER_SETTINGS
+  anti_aliasing: 4  # DLAA (robodojo_rig.ANTIALIASING); the backend reads it back into the results
+  path_tracing_samples: 512
+  path_tracing_spp: 8
+  path_tracing_bounces: 8
+  render_updates: 72
+  materials:
+    worktop:
+      texture_set: epoxy
+      uv_scale:
+      - 1.0
+      - 1.0
+      normal_strength: 0.18
+      roughness_map_weight: 0.5
+    steel:
+      texture_set: brushed_steel
+      uv_scale:
+      - 2.0
+      - 2.0
+      normal_strength: 0.2
+      roughness_map_weight: 0.65
+    aluminum:
+      texture_set: brushed_steel
+      uv_scale:
+      - 3.0
+      - 3.0
+      normal_strength: 0.15
+      roughness_map_weight: 0.45
+    polymer:
+      texture_set: powder_coat
+      uv_scale:
+      - 2.0
+      - 2.0
+      normal_strength: 0.18
+      roughness_map_weight: 0.5
+    wall:
+      texture_set: painted_plaster_wall
+      uv_scale:
+      - 0.5
+      - 0.5
+      normal_strength: 0.15
+      roughness_map_weight: 0.6
+      tint:
+      - 0.84
+      - 0.91
+      - 0.98
+    floor:
+      texture_set: grey_tiles
+      uv_scale:
+      - 0.75
+      - 0.75
+      normal_strength: 0.15
+      roughness_map_weight: 0.7
+physics:
+  contact_offset: 0.001
+  rest_offset: 0.0
+  solver_position_iterations: 16
+  solver_velocity_iterations: 4
+  minimum_grasp_time: 0.04
+  contact_force_threshold: 0.06
+  relative_hold_speed: 0.2
+  recovery_dwell: 0.3
+  catch_dwell: 0.25
+robot:
+  # Dual ARX X5 on the RoboDojo rig (src/roboclock/envs/robodojo_rig.py, docs/robodojo-rig-spec.md):
+  # bases side by side 0.60 m apart at one height and one forward coordinate, both facing the rig's
+  # forward direction (yaw 0 = +x); head camera (policy `rgb`) at (0.04, 0, 0.543) m in the rig
+  # frame pitched 60 deg down; a D435 wrist camera on each link6. Every value relative to the rig
+  # comes from the shared module; this block only places the rig per task: `origin` = midpoint of
+  # the two bases on the mount plane, optional `yaw` (radians). Arm 0, the arm single-arm tasks
+  # drive, is on the rig's right (-y), arm 1 on its left (+y) (hospital/rig.py).
+  model: dual_arx_x5
+  rig:
+    default: {origin: [0.0, 0.30, 1.05], yaw: 0.0}
+    tasks:
+      A1: {origin: [0.0, 0.30, 1.05]}
+      A2: {origin: [0.15, 0.30, 1.05]}
+      A3: {origin: [0.0, 0.30, 1.05]}
+      A4: {origin: [0.0, 0.30, 1.50]}
+      B1: {origin: [0.15, 0.30, 1.20]}  # the B6 bay pose, raised: the flowmeter knob stands 0.22 m above the mounts (1.42 m), where the forward-pointing hand reaches it
+      B2: {origin: [0.17, 0.42, 1.20]}  # arm 0 beside the over-bed table, raised: the AED sits at 1.06-1.14 m
+      B3: {origin: [0.15, 0.20, 1.05]}
+      B4: {origin: [0.0, 0.30, 1.12]}  # mattress 0.60 m: the airway connector 0.33 m, the chest towel 0.25 m below the mounts
+      B5: {origin: [0.0, 0.30, 1.22]}
+      B6: {origin: [0.0, 0.30, 1.12]}  # mattress 0.60 m (B4's bed): the windlass rod on the thigh 0.30 m below the mounts
+      C1: {origin: [0.10, 0.0, 1.05]}
+      C2: {origin: [0.10, 0.0, 1.05]}
+      C3: {origin: [0.04, 0.0, 1.05]}  # 4 cm toward the cart: the inner pockets stay within 0.5 m of each arm
+      C4: {origin: [0.08, -0.12, 1.05]}
+  # B2/B3: keys and pads well off arm 0's forward axis and below its mount (B3's fire alarm at ~60
+  # degrees, 0.28 m down) fold the shoulder to joint2 ~2.5-2.9 rad, where the X5's link2 hull meets its
+  # base_link hull (lab/robot.py filter_self_collisions; the lab filters the same pair).
+  self_collision_filters: [[base_link, link2]]
+  self_collision_filter_tasks: [B2, B3]
+control:
+  max_cartesian_speed: 0.35
+  insertion_speed: 0.07
+  reactive_speed: 0.65
+  # Target lead over the measured joints per control period. The drives lag by
+  # kd/kp = 0.04 s, so the arm settles at speed * (1 - exp(-T/0.04)), about 1.13 rad/s.
+  joint_target_speed: 2.9
+  phase_timeout: 10.0
+# Only temporal parameters and placement tolerances change with difficulty (ward C1-C4: neither;
+# they keep the medium tolerance and are scored at every time tier from one run).
+# Ranges are first-pass values; they have not been checked against a controller.
+difficulty:
+  easy:
+    orientation_tolerance: 0.3
+  medium:
+    orientation_tolerance: 0.2
+  hard:
+    orientation_tolerance: 0.12
+episode:
+  max_time: 120.0
+  window_start_range:
+  - 8.0
+  - 12.0
+  event_time_range:
+  - 4.0
+  - 10.0
+tasks:
+  # Ward process-window tasks A1-A3 (tasks/window/base.py): the monitored quantity enters its band
+  # at a seeded time in window_open_range (the same for every level of a seed) and leaves it
+  # window_width later. One measured device action inside [t_o, t_c] succeeds; earlier is short,
+  # later overshoots. Widths follow the task sheet. Checked 2026-11-16 against the reference oracle
+  # (seeds 0-9 x 3 levels): it acts within 0.04 s of the window midpoint at every level, and its
+  # device action itself (start to actuation) takes at most 0.34 / 1.33 / 0.17 s (A1 / A2 / A3),
+  # well inside the hard widths.
+  A1:  # drip chamber level: open the roller clamp, then slide it shut inside the band (window 3-6 s)
+    # The level is still until the robot opens the clamp; it reaches the band fill_lead seconds after
+    # the opening (seeded, the same for every level of a seed). windows are relative to the opening;
+    # open_allowance seconds are added to the episode for the opening itself (2026-11-19 redesign).
+    window_profile: process
+    num_items_range: [1, 1]
+    fill_lead_range: [3.0, 5.0]
+    open_allowance: 6.0
+    tail: 3.0
+    film_iso: 96  # head-camera exposure (see visuals.film_iso); 60 on 2026-11-17, x1.6 on 2026-11-18; 250 until 2026-11-17
+    easy: {window_width: [6.0, 6.0]}
+    medium: {window_width: [4.5, 4.5]}
+    hard: {window_width: [3.0, 3.0]}
+  A2:  # two 100 mL gravity bags, wide open: turn the selector to bag 2 after bag 1 empties and
+    # before its drip chamber runs dry (window 3-8 s)
+    window_profile: process
+    num_items_range: [1, 1]
+    window_open_range: [5.0, 7.5]
+    tail: 3.0
+    film_iso: 88  # head-camera exposure (see visuals.film_iso); 55 on 2026-11-17, x1.6 on 2026-11-18; 250 until 2026-11-17
+    easy: {window_width: [8.0, 8.0]}
+    medium: {window_width: [5.5, 5.5]}
+    hard: {window_width: [3.0, 3.0]}
+  A3:  # bag-valve ventilation of an intubated manikin (tasks/window/bvm_ventilation.py, since
+    # 2026-11-19; the syringe pump STOP task before, see results.py): squeeze the resuscitator bag
+    # once per breath, 10 breaths/min = one beat every 6 s (adult with an advanced airway). Each
+    # squeeze must be delivered inside the window centered on its beat; num_items breaths per
+    # episode. The first beat is seeded (the same for every level of a seed).
+    window_profile: rhythm
+    num_items_range: [4, 4]
+    beat_period: 6.0
+    first_beat_range: [7.0, 9.0]
+    tail: 2.0
+    film_iso: 116  # head-camera exposure (see visuals.film_iso): reset-frame mean luma 150.6 at 104
+    # Window around each beat: +-1.5 / +-1.0 / +-0.5 s (hard is the suite's 1 s floor). The beats
+    # are a fixed 10/min metronome, so the mean rate is 10/min at every level; a single
+    # breath-to-breath interval may be 3-9 / 4-8 / 5-7 s. The oracle delivers within 0.01 s of
+    # the beat (2026-11-20, seeds 0-9 x 3 levels, results/hospital/A3/oracle_summary.json).
+    easy: {window_width: [3.0, 3.0]}
+    medium: {window_width: [2.0, 2.0]}
+    hard: {window_width: [1.0, 1.0]}
+  A4:  # start the infusion: 1 spike + hang the saline bag, 2 press pump START (in order). B6 until
+    # 2026-11-19, counted with the A class since; still judged by its response_limit from the order.
+    bedside_profile: bedside
+    film_iso: 120  # head-camera exposure (see visuals.film_iso); 75 on 2026-11-17, x1.6 on 2026-11-18; 120 until 2026-11-17
+    num_items_range: [1, 1]
+    # The policy reads the instruction from the first observation, so the clock starts there (see B6).
+    instruction_time: 0.0  # the order is shown from frame 0 and issued there; the robot starts tucked, at rest
+    # Limit runs from the instruction to the end of the START press. Recalibrated 2026-11-16 against
+    # the reference oracle (seeds 0-9 x 3 levels, zero latency/delay, tucked start, both steps;
+    # 6.44-6.66 s): hard = max(t / 0.8, t + 0.3 s), medium = sqrt(easy * hard).
+    # Easy (2026-11-23, user rule: a documented time where one exists, else 4 x t): no document,
+    # so 4 x 6.66 = 26.64 s (was 13.2 s); medium = sqrt(easy * hard) (was 10.49 s).
+    easy: {response_limit: [26.64, 26.64]}
+    medium: {response_limit: [14.9, 14.9]}
+    hard: {response_limit: [8.33, 8.33]}
+  B4:  # ventilator circuit disconnection (since 2026-11-19; the infusion-line switch until then):
+    # the circuit comes off the tracheostomy connector at a seeded time (episode.event_time_range),
+    # the robot starts tucked and has to reseat the elbow. No instruction_time: the response limit
+    # runs from the disconnection to the first released, retained instant of the reseated elbow.
+    bedside_profile: bedside
+    num_items_range: [1, 1]
+    film_iso: 112  # head-camera exposure (see visuals.film_iso): mean luma ~157 at reset
+    # Limits. Easy is the adult default apnoea interval of an ICU ventilator (20 s, Puritan Bennett
+    # 840 manual; logged disconnection alarms last 23.3 s on average, Evans 2005). It was three
+    # missed breaths (11.25 s, medium 6.65 s) until 2026-11-20, when the user moved it onto the real value.
+    # Hard follows the reference oracle (2026-11-19, seeds 0-9 x 3 levels, zero latency/delay,
+    # tucked start: reconnected 3.08-3.14 s after the disconnection, of which 0.45 s is the
+    # pop-off itself and 1.30-1.36 s pass before the grasp): hard = max(t / 0.8, t + 0.3 s, 1 s)
+    # = 3.93 s; medium = sqrt(easy * hard).
+    easy: {response_limit: [20.0, 20.0]}
+    medium: {response_limit: [8.87, 8.87]}
+    hard: {response_limit: [3.93, 3.93]}
+  B5:  # anaphylaxis auto-injector (since 2026-11-20; "hang the bag, open the clamp" until then):
+    # the blood pressure falls and the monitor alarms at a seeded time (episode.event_time_range);
+    # the robot starts tucked and has to take the auto-injector from its holder, press its tip on
+    # the thigh's injection pad and hold it 3 s. No instruction_time: the response limit runs from
+    # the alarm to the end of the hold.
+    bedside_profile: bedside
+    num_items_range: [1, 1]
+    film_iso: 104  # head-camera exposure (see visuals.film_iso): mean luma ~156 at reset
+    # Seeded per-episode placement (m), the same at every level of a seed, on top of the common
+    # scene shift (bedside/autoinjector.py::sample_spatial): the kit tray with the holder on the
+    # table (robot x, y), the pad around (+ outward) and along (+ toward the knee) the thigh,
+    # and where the patient lies on the mattress (robot x, y).
+    spatial:
+      tray_dx: [-0.03, 0.03]
+      tray_dy: [-0.04, 0.04]
+      pad_across: [-0.02, 0.01]
+      pad_along: [-0.03, 0.03]
+      patient_dx: [-0.015, 0.015]
+      patient_dy: [-0.025, 0.025]
+    # Limits. The 3 s hold is the device's own (EpiPen label, FDA 3/2026: "hold in place for 3
+    # seconds"), so no limit can be shorter than the reach plus 3 s. Easy is the mean time
+    # untrained adults took to give an EpiPen in a simulated emergency (33.72 s; Knibb and Morton,
+    # Clin Transl Allergy 2015;5(Suppl 3):O5). Hard follows the reference oracle (2026-11-20,
+    # seeds 0-9 x 3 levels, zero latency/delay, tucked start: hold complete 6.61-6.68 s after the
+    # alarm: grasp at 1.38-1.46 s, tip pushed in at 3.61-3.68 s, then the 3 s hold):
+    # hard = max(t / 0.8, t + 0.3 s, 1 s) = 8.35 s; medium = sqrt(easy * hard).
+    # Recalibrated 2026-11-20 with the seeded placement (spatial above): the slowest response is
+    # now 6.904 s, at the forced corner with the tray farthest from the pad (seeds 0-9 x 3 levels:
+    # 6.58-6.79 s, 30/30; four forced corners x 3 seeds: 6.32-6.90 s, 12/12), so hard =
+    # 6.904 / 0.8 = 8.63 s.
+    easy: {response_limit: [33.7, 33.7]}
+    medium: {response_limit: [17.05, 17.05]}
+    hard: {response_limit: [8.63, 8.63]}
+  B6:  # massive limb haemorrhage (since 2026-11-20; the pump-panel key press until then): the
+    # thigh wound of a bleeding-control manikin starts to bleed at a seeded time
+    # (episode.event_time_range); the robot starts tucked and has to turn the pre-placed
+    # tourniquet's windlass rod one half-turn into its retaining clip and let go. No
+    # instruction_time: the response limit runs from the start of the bleeding to the first
+    # released, retained instant of the rod in the clip.
+    bedside_profile: bedside
+    num_items_range: [1, 1]
+    film_iso: 94  # head-camera exposure (see visuals.film_iso): mean luma ~159 at reset
+    # Seeded placement, drawn per episode from the layout rng (the same at every level of a seed),
+    # on top of the scene's common +-2.5 cm shift (bedside/tourniquet.py::sample_placement):
+    placement:
+      band_shift_m: [-0.03, 0.02]    # band, windlass and wound along the thigh (+ toward the hip)
+      rod_start_deg: [-10.0, 10.0]   # the rod's start angle off the limb axis
+      clip_deg: [-6.0, 6.0]          # the retaining clip's angle off the limb axis
+      leg_yaw_deg: [-4.0, 4.0]       # yaw of the leg (and patient) about the windlass
+    # The turn to the clip is 180 + clip - rod_start degrees (164-196); the bleeding stops 30
+    # degrees before the clip.
+    # Limits. Easy is the 24 s (+- 4) experienced providers take to apply a Combat Application
+    # Tourniquet to a thigh bleeding trainer, stopped when the windlass is secured (Lechner et al.,
+    # BMC Emerg Med 24:90, 2024, doi:10.1186/s12873-024-01005-x); here the band is already placed,
+    # so only the windlass turn and securing remain. Hard follows the reference oracle (2026-11-20,
+    # with the seeded placement, seeds 0-9 x 3 levels, zero latency/delay, tucked start: rod
+    # released in the clip 3.98-4.35 s after the bleeding starts, first turn at 1.44-1.52 s,
+    # bleeding stopped at 3.56-3.92 s; turns of 167-194 degrees): hard = max(t / 0.8, t + 0.3 s,
+    # 1 s) = 5.44 s; medium = sqrt(easy * hard). (5.21 / 11.18 s before the placement was seeded;
+    # the forced range extremes, 164 and 196 degrees, take 3.86-4.42 s.)
+    easy: {response_limit: [24.0, 24.0]}
+    medium: {response_limit: [11.43, 11.43]}
+    hard: {response_limit: [5.44, 5.44]}
+  B1:  # oxygen desaturation (since 2026-11-19; the ICU pump alarms it replaced are the legacy B1):
+    # SpO2 falls and crosses 90 % at a seeded event time (episode.event_time_range); the robot,
+    # tucked at rest, must then turn the wall flowmeter's knob until the ball float stays 0.5 s
+    # inside the ordered band (5, 6 or 7 L/min +- 1, by seed), within response_limit of the alarm.
+    # Calibrated 2026-11-19 against the reference oracle (seeds 0-9 x 3 levels, zero latency/delay,
+    # tucked start; alarm to settled float 3.56-4.15 s: about 2.45 s reach to the first knob turn,
+    # 0.6-1.2 s of turning, 0.5 s dwell; slowest 4.152 s, a 7 L/min order):
+    # hard = max(t / 0.8, t + 0.3 s, 1 s), easy = 8 s, medium = sqrt(easy * hard).
+    bedside_profile: bedside
+    num_items_range: [1, 1]
+    film_iso: 100  # head-camera exposure (see visuals.film_iso): mean luma ~157 at reset
+    # Easy since 2026-11-23 (user): the documented time, 55 s, the median after which nurses outside
+    # the room reached critical alarms, over half of them desaturations (Joshi et al. 2017). Was 8 s,
+    # a design value. medium = sqrt(easy * hard) = 16.9 s (was 6.44 s).
+    easy: {response_limit: [55.0, 55.0]}
+    medium: {response_limit: [16.9, 16.9]}
+    hard: {response_limit: [5.19, 5.19]}
+  B2:  # cardiac arrest: pull the pad tab, put both pads on the chest marks, then press SHOCK within
+    # response_limit of the arrest. Needs about 7 s per pad, 6 s for the tab and 5 s for the press,
+    # plus the AED's 8 s analysis (aed_response.ANALYSIS; 2 s until 2026-11-16, when every limit below
+    # moved out by the same 6 s: 55-60 / 45-50 / 38-42 before). Recalibrated 2026-11-16 against the
+    # reference oracle (8 s analysis, seeds 0-9 x 3 levels, zero latency/delay; shock at
+    # 23.02-23.13 s after the arrest): the low end of the hard range is max(t / 0.8, t + 0.3 s), the
+    # range keeps its 4 s width, and medium is sqrt(easy * hard) at each end.
+    num_items_range: [3, 3]
+    film_iso: 88  # head-camera exposure (see visuals.film_iso); 55 on 2026-11-17, x1.6 on 2026-11-18; 250 until 2026-11-17
+    # Easy since 2026-11-23: no documented limit, so the low end is 4 x 23.13 = 92.52 s and the
+    # range keeps its 5 s width (was 61-66 s); medium = sqrt(easy * hard) at each end (was 42-46.61).
+    easy: {response_limit: [92.52, 97.52]}
+    medium: {response_limit: [51.73, 56.66]}
+    hard: {response_limit: [28.92, 32.92]}
+  B3:  # hazardous drug spill (tasks/reactive/drug_spill.py; the fire blanket until 2026-11-19, now
+    # only in legacy_benchmark.yaml): a cytotoxic drug bottle falls off the rack and breaks. Lay the
+    # absorbent towel pad on the spreading liquid within 40 % of the limit (the CONTAIN dial runs
+    # out and the puddle reaches its full 0.10 m radius exactly then), then put both glass pieces into the sharps bin, all within
+    # response_limit of the break. Calibrated 2026-11-19 against the reference oracle (seeds 0-9 x
+    # 3 levels, zero latency/delay, start pose held until the break; pad down 4.28-4.40 s, both
+    # pieces binned 14.28-14.61 s after the break): the low end of the hard range is
+    # max(t / 0.8, t + 0.3 s) of the slowest response, the range is 4 s wide, easy is about 2.8x the
+    # oracle (as the fire task was), and medium is sqrt(easy * hard) at each end. The containment
+    # limit at the hard low end (7.31 s) also keeps the rule (4.40 / 0.8 = 5.5 s).
+    # Re-run after the towel / no-frame review (same day): pad 4.22-4.35 s, done 14.18-14.45 s,
+    # 30/30; the rule would give 18.07 s, so the limits were left as they are.
+    spill_profile: spill
+    num_items_range: [3, 3]  # the pad and two glass pieces
+    cover_radius: 0.045  # the pad's centre must rest this close to the break
+    film_iso: 108  # head-camera exposure (see visuals.film_iso): reset-frame mean luma ~155
+    # Easy since 2026-11-23: no documented limit, so the low end is 4 x 14.61 = 58.44 s and the
+    # range keeps its 6 s width (was 40-46 s); medium = sqrt(easy * hard) at each end (was 27.03-32.01).
+    easy: {response_limit: [58.44, 64.44]}
+    medium: {response_limit: [32.68, 37.88]}
+    hard: {response_limit: [18.27, 22.27]}
+  # Ward throughput tasks C1-C4: shared scene-02 left ward, two arms, judged as in
+  # docs/c-class-timing.md (score_version 2). Q = num_items jobs; every episode runs to
+  # H = 5 t_o (t_o frozen in roboclock/evaluation/throughput.py), ends early when all Q stayed done
+  # for 2 s or on the stall stop, and is scored at all three time tiers T = 4 / sqrt5 / 1.25 x t_o from
+  # t_Q. Difficulty changes nothing in the episode, so these blocks carry no per-level values.
+  # required_accuracy sets the allowed final misplacements, floor((1 - accuracy) * Q) = 0.
+  C1:  # pick-to-light style order picking (per order line) on the ward counter, both arms: vials from two stock risers into 4 RX bins
+    # 4 RX bins x 2 vials = Q 8 (+1 spare per riser, a distractor); each arm fills its own two bins.
+    # Oracle (2026-11-16, seeds 0-9 easy): slowest t_Q 16.09 s = t_o in roboclock/evaluation/throughput.py.
+    ward_profile: ward
+    film_iso: 72  # head-camera exposure (see visuals.film_iso); 45 on 2026-11-17, x1.6 on 2026-11-18; 100 until 2026-11-17
+    num_items_range: [8, 8]
+    required_accuracy: 0.95
+  C2:  # instrument tray sort: scalpels / hemostats / forceps from a basin into Mayo-stand slots
+    ward_profile: ward
+    film_iso: 88  # head-camera exposure (see visuals.film_iso); 55 on 2026-11-17, x1.6 on 2026-11-18; 200 until 2026-11-17
+    num_items_range: [6, 6]
+    required_accuracy: 0.95
+    # Two arms in parallel (3 instruments each). Oracle (5 seeds): all six sorted by 17.5-18.4 s.
+  C3:  # crash-cart vial restock, two arms: 12 color-capped vials (6 per arm's tray) upright into
+    # the drawer insert's drug lanes. Oracle: 12th vial at 28.0-28.5 s.
+    ward_profile: ward
+    num_items_range: [12, 12]
+    required_accuracy: 0.95
+    film_iso: 88  # head-camera exposure (see visuals.film_iso); 55 on 2026-11-17, x1.6 on 2026-11-18; 100 until 2026-11-17
+  C4:  # blood-tube triage, two arms: 12 tubes (6 per arm's tray) into 3 analyzer racks by stopper color.
+    # Oracle (2026-11-16, seeds 0-9 easy): slowest 12th tube 26.34 s = t_o (earlier demos: 25.8-28.1 s).
+    ward_profile: ward
+    film_iso: 72  # head-camera exposure (see visuals.film_iso); 45 on 2026-11-17, x1.6 on 2026-11-18; 100 until 2026-11-17
+    num_items_range: [12, 12]
+    required_accuracy: 0.95

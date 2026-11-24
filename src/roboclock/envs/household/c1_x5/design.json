@@ -1,0 +1,101 @@
+{
+  "id": "C1",
+  "revision": "R3 (2026-11-06): serving relay at the pass; replaces the R2.2 four-bowl microwave relay",
+  "embodiment": "Dual ARX X5, stationary island mount (common rig: bases side by side at x=0.00 / 0.60 m, y=-0.255 m, 0.60 m apart, facing +y; RoboDojo head camera 0.04 m forward of the base midpoint, 0.543 m above the mount tops, 60 deg down, Gemini 345Lg 640x480; D435 wrist cameras on link6); ready pose q=[0, .94, 1.34, -1.40, 0, 0]",
+  "time_origin": "t=0 at the first agent observation; the pickups keep their times while the agent deliberates",
+  "interface": "16-value joint targets (x5/interface.py); observations: head and wrist RGB, joints, tool poses, gripper widths, instruction",
+  "status": "design + static initial state + task/process/scoring model + Isaac Sim physics episode with a privileged oracle controller (sim.py), validated against the task model and an independent trajectory check, and recorded (one reference episode, seed 0, medium)",
+  "title": "Serve the ordered meals at the pass",
+  "category": "C qualified throughput (single-plate pass, two-arm relay)",
+  "household_need": "Lunch orders go out one plate at a time: a waiter collects at set times, each time a particular meal.",
+  "instruction": "Serve the meals on the serving board in the order given. The board holds one bowl; a waiter takes it at each pickup time. Bring the waiting bowls to the mat, then on to the board. A meal is served once its bowl stands upright and released on the board; the waiter takes whatever bowl is there, and a late meal after it has stood there 1 second. A bowl tilted more than 40 degrees, even in a gripper, or off the counter counts as dropped and fails the task.",
+  "why_r3": "R2.2 ran 600 process seconds (800 / 600 / 400 s at easy / medium / hard), a quarter of the simulated time of the household suite, most of it waiting on the microwave; one microwave turnaround alone took the oracle about 40 s. R3 keeps the bowls, the staging mat, the board and the handle grasps, and runs 60 process seconds.",
+  "core_interventions": [
+    "left arm: take the next wanted meal from the counter by handle B and set it down on the staging mat",
+    "right arm: take the staged meal from the mat by handle A and set it down on the serving board",
+    "keep the board free for one bowl: set the next meal down only after the waiter has taken the previous one"
+  ],
+  "process": {
+    "state": "which bowl rests on the board; which bowls the waiter has taken",
+    "model": "at each pickup time the waiter takes the bowl resting released and upright on the board; it qualifies if it is the meal wanted at that pickup",
+    "hidden": {},
+    "per_seed": {
+      "order": "permutation of the four meals (curry, rice, soup, pasta); the first wanted meal starts on the mat",
+      "slots": "which waiting meal stands in which of the three counter slots",
+      "jitter": "counter slots +-1.2 cm in x and y, +-8 deg in yaw"
+    },
+    "nominal": {
+      "difficulty": "medium",
+      "order": ["curry", "rice", "soup", "pasta"],
+      "pickups_s": [21.06, 46.98, 72.9, 98.82],
+      "horizon_s": 123.525
+    },
+    "cue": "the instruction names the order and the pickup times (the card on the counter only states the rule); the meals are told apart by their food"
+  },
+  "timing": {
+    "event": "a pickup qualifies when the wanted meal rests released and upright on the board at its pickup time",
+    "rule": "C-class stream task (score_version 2, docs/c-class-timing.md): each order is a job, its deadline the pickup time, its time when its meal was set down on the board (it must stay there until the waiter takes it). A pickup without its meal leaves the order open: the waiter takes that meal once it has rested on the board for 1 s. The pickups are 4 / 2 / 1 x the hard schedule at easy / medium / hard (see difficulty). Horizon 1.25 x the last pickup; the episode ends 2 s after the last pickup once every ordered meal is served. Reported: qualified meals, slack (pickup minus time on the board) per order"
+  },
+  "completion": {
+    "physical": [
+      "no bowl dropped or tipped over (tilt > 40 deg)",
+      "every ordered meal served by the end of the episode, late or not (on the board or taken by the waiter)"
+    ],
+    "temporal": "every ordered meal on the board by its pickup (judge_stream; no physical terms)"
+  },
+  "failures": [
+    "bowl dropped",
+    "wrong meal on the board at a pickup (violation; the order does not qualify)"
+  ],
+  "permitted": [
+    "serving a meal long before its pickup, if the board is free"
+  ],
+  "prohibited": [
+    "two bowls on the board"
+  ],
+  "arm_roles": "left: counter slots to the staging mat (handle B); right: staging mat to the serving board (handle A). One arm at a time works at the mat.",
+  "layout": {
+    "staging_mat": {"center_m": [0.30, -0.25], "bowl_yaw_deg": 115, "note": "on the line between the bases: the only place where one handle axis suits both arms (R2.2 position); wrist-camera view only (x5/visibility.py)"},
+    "serving_board": {"center_m": [0.58, 0.27], "size_m": [0.11, 0.11, 0.018], "bowl_yaw_deg": 22.5, "note": "in front of the right arm, out of the left arm's reach"},
+    "counter_slots": [
+      {"center_m": [0.20, 0.16], "bowl_yaw_deg": 154.3},
+      {"center_m": [0.03, 0.22], "bowl_yaw_deg": 176.4},
+      {"center_m": [-0.14, 0.18], "bowl_yaw_deg": 197.8}
+    ],
+    "why": [
+      "An X5 holds a bowl by a handle only beyond about 0.28 m from its own base, so neither arm reaches both the counter slots (front left) and the board (front right).",
+      "The slots face the left arm (handle B toward its base) and lie outside the right arm's reach; the left arm carries along arcs that keep its hand more than 0.3 m from its base and waits 0.3 m from the right arm's route while the mat is busy.",
+      "R2.2 put the waiting bowls in front of the right base, where the left arm unfolded over the board and could stage only after each pickup; R3's slots keep the arms on their own sides, so staging overlaps serving."
+    ]
+  },
+  "demo_guidance": [
+    "Bowls have two 20 deg upswept lug handles; every grasp pinches a handle with the tool pitched 20 deg down (pads parallel to the handle) and closes each jaw until contact.",
+    "Carrying a bowl: ramp speed and turn rate (0.25 m/s^2, 1 rad/s^2); a jerk rotates the bowl about the pinch axis.",
+    "The right arm holds the next meal beside the board (16 cm from the board bowl) until the pickup, then sets it down."
+  ],
+  "open_items": [
+    "the waiter is appliance logic: the bowl on the board is moved off the counter at the pickup time",
+    "bowl mass 0.14 kg with food; 20 N/jaw clamp is an assumption"
+  ],
+  "assets": [
+    {"name": "MealBowl1", "role": "curry in a ceramic bowl", "source": "src/roboclock/envs/household/assets/x5/objects/bowl_5/bowl_5.usdc", "size_m": [0.1, 0.1, 0.0602]},
+    {"name": "MealBowl2", "role": "rice in a ceramic bowl", "source": "src/roboclock/envs/household/assets/x5/objects/bowl_5/bowl_5.usdc", "size_m": [0.1, 0.1, 0.0602]},
+    {"name": "MealBowl3", "role": "soup in a ceramic bowl", "source": "src/roboclock/envs/household/assets/x5/objects/bowl_5/bowl_5.usdc", "size_m": [0.1, 0.1, 0.0602]},
+    {"name": "MealBowl4", "role": "pasta in a ceramic bowl", "source": "src/roboclock/envs/household/assets/x5/objects/bowl_5/bowl_5.usdc", "size_m": [0.1, 0.1, 0.0602]},
+    {"name": "StagingMat", "role": "relay point between the arms", "source": "authored in c1_x5/scene.py (disclosed proxy)", "size_m": [0.15, 0.15, 0.003]},
+    {"name": "ServingBoard", "role": "the pass: one bowl, collected by the waiter", "source": "authored in c1_x5/scene.py (disclosed proxy)", "size_m": [0.11, 0.11, 0.018]}
+  ],
+  "files": {
+    "task_model": "src/roboclock/envs/household/c1_x5/task.py",
+    "scene_builder": "src/roboclock/envs/household/c1_x5/scene.py",
+    "simulation": "src/roboclock/envs/household/c1_x5/sim.py",
+    "demo": "data/household/x5_demos/C1/"
+  },
+  "difficulty": {
+    "rule": "C-class stream rule (2026-11-09, docs/c-class-timing.md): the same four orders at every tier; the pickups are m x the hard schedule (m = 4 / 2 / 1 at easy / medium / hard), which stretches the first pickup and the intervals alike; time_scale is 1 and nothing else changes; max_time = H = 1.25 x the last pickup. Hard is a first pickup at 10.53 s and one every 12.96 s, the tightest such schedule (0.01 s steps) the slowest oracle meets, from 28 oracle runs on seeds 0-6 and 50-56: 14 with the board freed 1 s after each set-down, so that no pickup held the oracle back, and 14 at this schedule. Until 2026-11-09: time_scale 0.75 / 1.0 / 1.5 divided the process-second pickups 20 / 32 / 44 / 56 s, and hard took three orders at 14 / 26 / 39 s.",
+    "easy": {"multiplier": 4, "max_time_s": 247.05, "orders": 4, "pickups_s": [42.12, 93.96, 145.8, 197.64]},
+    "medium": {"multiplier": 2, "max_time_s": 123.525, "orders": 4, "pickups_s": [21.06, 46.98, 72.9, 98.82]},
+    "hard": {"multiplier": 1, "max_time_s": 61.7625, "orders": 4, "pickups_s": [10.53, 23.49, 36.45, 49.41],
+             "note": "slowest oracle set-down per order 10.524 / 23.484 / 36.344 / 49.204 s (every seed; seed 2): the second order binds (10.53 + 12.96 >= 23.484), the third and fourth keep 0.11 and 0.21 s against the up to 0.1 s by which moving a pickup shifts later set-downs. All 14 seeds at hard: every order on the board by its pickup (smallest slack 0.006 s), physical, all_done. The next meal arrives beside the board about 8.8 s or more after each pickup, so the board never holds the oracle back at hard"}
+  }
+}

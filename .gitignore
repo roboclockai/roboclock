@@ -1,0 +1,111 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+.runtime-deps/
+.venv-*
+build/
+dist/
+results/
+/plan.json
+assets/
+# Lab package assets that are versioned; anything else in that folder stays local.
+!src/roboclock/envs/lab/assets/
+src/roboclock/envs/lab/assets/*
+!src/roboclock/envs/lab/assets/knife_switch/
+!src/roboclock/envs/lab/assets/knife_switch/**
+!src/roboclock/envs/lab/assets/safety_equipment/
+!src/roboclock/envs/lab/assets/safety_equipment/**
+!src/roboclock/envs/lab/assets/arx_x5/
+!src/roboclock/envs/lab/assets/arx_x5/**
+src/roboclock/envs/lab/assets/arx_x5/converted/
+!src/roboclock/envs/lab/assets/hotplate/
+!src/roboclock/envs/lab/assets/hotplate/**
+!src/roboclock/envs/lab/assets/darkroom/
+!src/roboclock/envs/lab/assets/darkroom/**
+!src/roboclock/envs/lab/assets/textures/
+!src/roboclock/envs/lab/assets/textures/**
+# Shared studio HDR used by lab and sports.
+!src/roboclock/assets/
+# Meshes of the retired centrifuge task (old B7); keep them out of git.
+src/roboclock/envs/lab/assets/safety_equipment/centrifuge_body.usdc
+src/roboclock/envs/lab/assets/safety_equipment/centrifuge_lid.usdc
+src/roboclock/envs/lab/assets/safety_equipment/machine_centrifuge.glb
+# Extracted lab scene assets and their recorded materials, without raw OBJ packs.
+!/assets/
+/assets/*
+!/assets/README.md
+!/assets/lab/
+/assets/lab/*
+!/assets/lab/*.usdc
+!/assets/lab/*.json
+!/assets/lab/README.md
+!/assets/lab/upholstery/
+!/assets/lab/upholstery/**
+!/assets/lab/mountain/
+!/assets/lab/mountain/**
+!/assets/lab/marble8k/
+!/assets/lab/marble8k/**
+!/assets/lab/textures/
+!/assets/lab/textures/**
+.tools/
+.DS_Store
+
+# Hospital models (credits.json), catalogs and CC0 textures (textures/sources.json).
+!src/roboclock/envs/hospital/assets/
+
+# Scene-02 wards loaded by hospital, with their textures. The first
+# import is an intermediate conversion that no code loads.
+!/assets/hospital/
+/assets/hospital/ward_02_left_initial_import.*
+/assets/hospital/textures/ward_02_left_initial_import/
+
+# Household assets. The Lightwheel kitchen (CC BY-NC 4.0) has files over GitHub's 100 MB limit:
+# scripts/household/fetch_lightwheel_kitchen.py downloads it into assets/household/ and links it.
+!src/roboclock/envs/household/**/assets/
+!/assets/household/
+/assets/household/lightwheel_kitchen/
+src/roboclock/envs/household/assets/x5/lightwheel_kitchen/
+
+# Reviewed Industry generation dependencies, parallel to assets/lab.
+!/assets/industry/
+!/assets/industry/**
+
+# Sports / chess models and textures are versioned with their environments.
+!src/roboclock/envs/chess/assets/
+!src/roboclock/envs/sports/**/assets/
+
+# Local diagnostic exports and duplicate archives; videos and metrics are versioned.
+/data/sports/videos/**/*.gz
+/data/sports/videos/**/*.wav
+/data/sports/videos/**/*.log
+
+# Reconstructed delivery archive: checksum-verified parts are versioned instead.
+/data/sports/new_videos/source-and-assets.tar.gz
+/data/sports/new_videos/*.assembling
+
+# Raw historical experiments stay local; publish reports/configurations/results.
+/data/sports/experiments/**/*.jsonl.gz
+/data/sports/experiments/**/*.jsonl.xz
+/data/sports/experiments/**/*.usda.gz
+/data/sports/experiments/**/*.usda.xz
+/data/sports/experiments/**/*.mp4
+/data/sports/experiments/**/*.png
+/data/sports/experiments/**/*.jpg
+/data/sports/experiments/**/*.zip
+/data/sports/experiments/**/*.log
+/data/sports/experiments/**/*.log.gz
+/data/sports/experiments/**/*.lock
+/data/sports/experiments/2026-10-24-supplemental-tests-startup-attempt/
+!/data/sports/experiments/2026-10-24-supplemental-tests/outcomes.png
+!/data/sports/experiments/2026-10-24-supplemental-tests/baseline-code.zip
+
+# Demonstration episodes linked into data/<env>/<task>/ by scripts/collect/promote_demos.py
+# (RoboDojo HDF5 symlinks into the collection, 60-600 MB each) and dataloader statistics.
+/data/*/*/arx_x5/
+/data/*/meta/
+
+# Oracle demo videos are published on the project page, not in this repo.
+/data/

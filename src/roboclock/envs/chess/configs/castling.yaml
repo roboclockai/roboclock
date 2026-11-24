@@ -1,0 +1,61 @@
+sim:
+  physics_dt: 0.008333333333333333
+  control_decimation: 4
+  camera_resolution:
+  - 960
+  - 720
+  settle_steps: 90
+visuals:
+  anti_aliasing: 4  # DLAA, the renderer default these recordings were made with
+  renderer: RaytracedLighting
+  render_updates: 24
+scene:
+  table_height: 0.75
+  board_center:
+  - 0.48
+  - 0.0
+  square_size: 0.05
+  board_height: 0.019
+  piece_radius: 0.012
+  piece_height: 0.045
+  piece_mass: 0.035
+  clock_position:
+  - 0.48
+  - -0.31
+  - 0.75
+  camera_position:
+  - 1.35
+  - -1.25
+  - 1.8
+  camera_look_at:
+  - 0.4
+  - 0.0
+  - 0.78
+physics:
+  placement_dwell: 0.2
+  max_linear_speed: 0.025
+  max_angular_speed: 0.25
+  max_tilt: 0.12
+  contact_force: 0.04
+  button_travel: 0.006
+  button_threshold: 0.003
+  button_dwell: 0.025
+control:
+  joint_target_speed: 1.5
+  transit_height: 0.96
+episode:
+  max_time: 60.0
+  opponent_press_range:
+  - 1.0
+  - 2.0
+  initial_fen: r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1
+  history: []
+  move: e1g1
+  claim_draw: false
+difficulties:
+  easy:
+    deadline: 30.0
+  medium:
+    deadline: 18.0
+  hard:
+    deadline: 10.0

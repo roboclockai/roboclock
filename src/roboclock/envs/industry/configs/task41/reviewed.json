@@ -1,0 +1,45 @@
+{
+  "task_id": 41,
+  "embodiment": "dual_arx_x5",
+  "seed": 0,
+  "process_min_s": 20.0,
+  "process_max_s": 40.0,
+  "recipe_provenance": "Approved 20\u201340s demonstration recipe on October20; not expert-calibrated chemistry",
+  "layout_offset_xy_m": [
+    0.0,
+    0.0
+  ],
+  "part_yaw_deg": 0.0,
+  "part_mass_kg": 0.15,
+  "randomization": {
+    "layout": false,
+    "timing": false,
+    "physical": false
+  },
+  "bounds": {
+    "layout_xy_m": [
+      -0.008,
+      0.008
+    ],
+    "part_yaw_deg": [
+      -8,
+      8
+    ],
+    "recipe_min_s": [
+      18,
+      22
+    ],
+    "window_duration_s": [
+      18,
+      22
+    ],
+    "mass_kg": [
+      0.135,
+      0.165
+    ]
+  },
+  "independence": "Separate SeedSequence child streams for layout, timing and physical properties",
+  "liquid_level_z_m": 0.885,
+  "controller_uses_privileged_state": true,
+  "sha256": "667af9b260460a9b4c884e5b16f82b5b4c41f847ae7af7b760bc98bc7d5d08e0"
+}

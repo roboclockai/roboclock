@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "roboclock"
+version = "0.1.0"
+description = "RoboClock: a unified benchmark for time-aware robotic intelligence in Isaac Sim"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "numpy>=1.26,<3",
+    "scipy>=1.11,<1.16; python_version < '3.12'",
+    "scipy==1.17.0; python_version >= '3.12'",
+    "PyYAML>=6,<7", "gymnasium>=1.0,<2", "Pillow>=10,<13", "chess==1.11.2",
+]
+
+[project.urls]
+Homepage = "https://roboclockai.github.io"
+Repository = "https://github.com/roboclockai/roboclock"
+Assets = "https://huggingface.co/datasets/Roboclockai/roboclock-assets"
+
+[project.optional-dependencies]
+sim = ["isaacsim[all,extscache]==5.1.0"]
+sim6 = ["isaacsim[all,extscache]==6.0.1"]
+# Sports / chess recordings were made with Isaac Sim 6.2.0.
+sim62 = ["isaacsim[all,extscache]==6.2.0.0"]
+industry = ["scipy==1.17.0"]
+dev = ["pytest>=8,<9", "ruff>=0.9"]
+
+[project.scripts]
+roboclock = "roboclock.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

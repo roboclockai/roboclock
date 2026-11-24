@@ -1,0 +1,274 @@
+{
+  "domain": "household",
+  "embodiment": "Dual ARX X5 (stationary island mount)",
+  "revision": "R2",
+  "selection_date": "2026-10-21",
+  "scope": "Current Dual-X5 task design: contracts, task/process/scoring models, initial scenes built in code (roboclock.envs.household.x5.build, byte-identical to initial_scene_sha256), the Isaac Sim environment (roboclock eval --env household) and one accepted privileged-oracle recording per task (demo).",
+  "tasks": [
+    {
+      "id": "A1",
+      "sheet_task": 11,
+      "category": "A",
+      "category_name": "temporal_window",
+      "name": "Sweeten a glass of tea with sugar from a jar and stir it",
+      "goal": "Add 10 to 25 g of sugar from the open jar to the glass of tea. Sugar runs once the jar tilts past 40-60 degrees (later when emptier), faster with more tilt (max 4 g/s), and settles as a white mound: 10 g is 5.2 cm across, 25 g 7.0 cm. 2 g spilled outside the glass fails. Set the jar down upright and let go. Then stir two full clockwise turns (seen from above), the spoon's whole head under the surface, and put the spoon back in its basket, released. No stirring until the jar is down.",
+      "assets": [
+        "TeaGlass",
+        "SugarJar",
+        "SugarMound",
+        "SugarStream",
+        "SpoonBasket",
+        "Spoon"
+      ],
+      "success_detection": "sugar poured; jar released upright and supported on the counter >= 1 s; spilled < 2 g; spoon head stayed in the glass during 2 net clockwise turns, only after the jar is down; spoon released, supported in basket, low speed >= 1 s; glass not displaced > 2 cm. Temporal: grams in the glass at the set-down inside the tier's band (easy 10-30, medium 10-25, hard 10-15 g)",
+      "temporal_model": "q = 4 c min(1, (theta - theta0)/35)^1.5 g/s, theta0 = 30 + 80 (1 - jar/94 g) deg; lands in the glass if the stream from the lowest mouth point falls inside its mouth (0.12 s air time constant); cue: sugar mound on the glass bottom",
+      "module": "roboclock.envs.household.a1_x5.task",
+      "scene": "roboclock.envs.household.a1_x5.scene",
+      "design": "a1_x5/design.json",
+      "initial_scene_sha256": "906e21c06b64704eb1676b16bd7a6f0fd69cd67adf586097bc58186c05c58cf3",
+      "demo": {
+        "path": "data/household/x5_demos/A1",
+        "difficulty": "medium",
+        "seed": 0
+      }
+    },
+    {
+      "id": "A2",
+      "sheet_task": 12,
+      "category": "A",
+      "category_name": "temporal_window",
+      "name": "Fill a glass about half full of ice at the refrigerator-door style ice dispenser",
+      "goal": "Fill the glass about half full at the refrigerator-door style ice dispenser: 40 to 60 % of its inner height, at the top of the highest cube. Take the glass off the counter, hold it under the outlet and push the paddle in with its rim. Ice is metered out in batches of one cube while the paddle is held in, during the first press only: pull the glass back when there is enough, then set it down upright on the counter and let go. Every cube must end up in the glass, which must never tilt more than 45 degrees.",
+      "assets": [
+        "IceMachine",
+        "IcePaddle",
+        "Glass",
+        "Ice"
+      ],
+      "success_detection": "paddle pressed (>= 5 deg, >= 0.25 s) and released; glass set down upright on the counter and released with every cube at rest >= 1 s; no cube outside the glass, glass not dropped. Temporal: ice level (top of the highest resting cube over the glass inner height) in [0.40, 0.60]",
+      "temporal_model": "while the paddle is held in, cube k is delivered at spin_up + sum of k-1 intervals of run time (interval x (1 + jitter_k)); after the release the auger coasts 0.12 s; one press only",
+      "module": "roboclock.envs.household.a2_x5.task",
+      "scene": "roboclock.envs.household.a2_x5.scene",
+      "design": "a2_x5/design.json",
+      "initial_scene_sha256": "52e7e5b62c0ecbd281c331000b30faa9b669f9bbf2f4819535a811854f801cdf",
+      "demo": {
+        "path": "data/household/x5_demos/A2",
+        "difficulty": "medium",
+        "seed": 0
+      }
+    },
+    {
+      "id": "A3",
+      "sheet_task": 13,
+      "category": "A",
+      "category_name": "temporal_window",
+      "name": "Flip one pancake at the right moment",
+      "goal": "A pancake is cooking in the frying pan. Flip it with the turner when its underside is golden, and leave it cooking in the pan. The underside turns from pale to golden to dark as it cooks; it cannot be seen from above, only where the pancake's edge is lifted. The flip counts once the pancake lies turned over, wholly inside the pan and at rest, with the turner off it and out of the pan: the blade's tip 3 cm outside the rim, or 12 cm above the pan's floor.",
+      "assets": [
+        "Cooktop",
+        "FryingPan",
+        "Pancake",
+        "Spatula"
+      ],
+      "success_detection": "pancake rotated > 150 deg about a horizontal axis; pancake fully inside pan, released, settled 1 s; turner withdrawn from pan area. Temporal: first-side browning in band",
+      "temporal_model": "d(t) = 1 - exp(-(t0 + t)/tau) while in pan contact; paused while lifted. p = clamp((t0 + t - 0.4 tau)/(0.9 tau), 0, 1) drives bubble density/popped ratio and edge set texture",
+      "module": "roboclock.envs.household.a3_x5.task",
+      "scene": "roboclock.envs.household.a3_x5.scene",
+      "design": "a3_x5/design.json",
+      "initial_scene_sha256": "a9987d1d269a2514c898a0b51bc8aff0f818516986d61eb5a97c096b98188316",
+      "demo": {
+        "path": "data/household/x5_demos/A3",
+        "difficulty": "medium",
+        "seed": 0
+      }
+    },
+    {
+      "id": "A4",
+      "sheet_task": 14,
+      "category": "A",
+      "category_name": "temporal_window",
+      "name": "Pour 300 g of hot water and stop in time",
+      "goal": "Pour 300 g (+/- 10 g) of water from the kettle into the glass jug on the scale, then set the kettle down upright on the counter and let go. Water runs out once the kettle tilts roughly 40 to 60 degrees toward its spout (further as it empties); what leaves while the spout's tip is not above the jug's mouth is spilled, and 5 g spilled fails the task. The kettle with its water weighs 1.5 to 1.9 kg. Someone is waiting: finish within 64 seconds, with the kettle standing released; the dose is read 3 s later.",
+      "assets": [
+        "Kettle",
+        "KitchenScale",
+        "GlassJug"
+      ],
+      "success_detection": "kettle released upright on counter; jug not moved off the scale; spill < 5 g. Temporal: dose in tolerance within budget",
+      "temporal_model": "q = c * max(0, theta - theta0(V_k))^1.5 ml/s (theta tilt), max ~40 ml/s; tail flow 0.3-0.6 s after crossing theta0 on the way back; scale shows round(m) with 0.3 s display lag",
+      "module": "roboclock.envs.household.a4_x5.task",
+      "scene": "roboclock.envs.household.a4_x5.scene",
+      "design": "a4_x5/design.json",
+      "initial_scene_sha256": "715c53e6925029e8862b9898aecbaa1c54429561f1b88679e1a92f14727b97e8",
+      "demo": {
+        "path": "data/household/x5_demos/A4",
+        "difficulty": "medium",
+        "seed": 0
+      }
+    },
+    {
+      "id": "B1",
+      "sheet_task": 15,
+      "category": "B",
+      "category_name": "event_reactive",
+      "name": "Shut off a sudden water surge before the bowl overflows",
+      "goal": "The gentle faucet stream suddenly surges. Wait for the surge, then shut it off; half a litre of overflow fails. The lever is the short rod right of the faucet neck. It cannot be pressed down: push its top about 2 cm sideways toward the neck (to the left, seen from the robot) until it stands upright. Then let go: it must stay shut and untouched for 1 second.",
+      "assets": [
+        "Sink",
+        "WaterBowl",
+        "WaterSurface",
+        "WaterAeration",
+        "Spill"
+      ],
+      "success_detection": "lever closed by robot contact; hand released. Temporal: spilled volume O < 0.5 L (graded)",
+      "temporal_model": "Q_in = lever opening * time_scale * (0.025 L/s before surge, 0.45 L/s after surge); integrate bowl volume and overflow. Abnormal supply fault, not normal rated flow.",
+      "module": "roboclock.envs.household.b1_x5.task",
+      "scene": "roboclock.envs.household.b1_x5.scene",
+      "design": "b1_x5/design.json",
+      "initial_scene_sha256": "940a7152815dd160cca2a18dbec0b9982d4bb24cc339609d764bc163e24d1856",
+      "demo": {
+        "path": "data/household/x5_demos/B1",
+        "difficulty": "medium",
+        "seed": 0
+      }
+    },
+    {
+      "id": "B2",
+      "sheet_task": 16,
+      "category": "B",
+      "category_name": "event_reactive",
+      "name": "Catch the object rolling off the counter",
+      "goal": "Something may roll off the counter. Catch it before it falls, and hold on to it: bring it to rest before its centre passes the counter's edge on the robot's side, then lift it at least 1.5 cm off the counter between both jaws of one gripper and keep it there for 1 second. Hold it gently: more than 30 N on a jaw crushes it. The other objects must stay where they are (within 1 cm).",
+      "assets": [
+        "Board",
+        "Cup",
+        "Egg",
+        "PillBottle",
+        "Apple"
+      ],
+      "success_detection": "target stopped on the counter short of the edge, then held clear of the counter by both jaws for 1 s; never fell; contact below 30 N; the other three objects undisturbed",
+      "temporal_model": "one peg retracts at hidden t in [1, 3] s; the object gathers speed on a board of 4.5 / 6 / 9 deg (easy / medium / hard) and reaches the edge 1.16-2.32 s later if nothing stops it",
+      "module": "roboclock.envs.household.b2_x5.task",
+      "scene": "roboclock.envs.household.b2_x5.scene",
+      "design": "b2_x5/design.json",
+      "initial_scene_sha256": "d7f21ce75029e70d9dc302b1102becb108a2c4a6058c9b57da6774a7809f1eaa",
+      "demo": {
+        "path": "data/household/x5_demos/B2",
+        "difficulty": "medium",
+        "seed": 0
+      }
+    },
+    {
+      "id": "B3",
+      "sheet_task": 17,
+      "category": "B",
+      "category_name": "event_reactive",
+      "name": "Turn off the burner under a pot of burning oil",
+      "goal": "The oil in the pot on the stove may catch fire at an unpredictable time. Wait for visible flames, then turn off its burner before the fire spreads: its knob is the middle one of the five and goes off with a quarter turn clockwise (seen from above), to its stop. The gas is off only within 10 degrees of that stop, and it counts once no gripper touches the knob, so let go. The pot's front handle overhangs the cooktop: its edge is 6 cm behind the knob's axis, 5 to 9 cm above the knob.",
+      "assets": [
+        "Cooktop",
+        "Pot",
+        "Flame",
+        "WaterGlass"
+      ],
+      "success_detection": "centre knob turned to OFF by robot contact; hand released; flame out for 3 s. Temporal: flame never reaches the spread threshold",
+      "temporal_model": "No initial flame; hidden ignition time U[2, 8] s (seed 0: 5 s). After ignition, flame f grows logistically (0.065/s) while the burner is on and spreads at 0.8 (about 48 s nominal); with the burner off it dies with a 1 s time constant; loss = integral of f",
+      "module": "roboclock.envs.household.b3_x5.task",
+      "scene": "roboclock.envs.household.b3_x5.scene",
+      "design": "b3_x5/design.json",
+      "initial_scene_sha256": "968e400845ae5cd11413601a40a5dbd9ced9fa19330ec935efd274638af8a301",
+      "demo": {
+        "path": "data/household/x5_demos/B3",
+        "difficulty": "medium",
+        "seed": 0
+      }
+    },
+    {
+      "id": "C1",
+      "sheet_task": 18,
+      "category": "C",
+      "category_name": "throughput",
+      "name": "Serve the ordered meals at the pass",
+      "goal": "Serve the meals on the serving board in the order given. The board holds one bowl; a waiter takes it at each pickup time. Bring the waiting bowls to the mat, then on to the board. A meal is served once its bowl stands upright and released on the board; the waiter takes whatever bowl is there, and a late meal after it has stood there 1 second. A bowl tilted more than 40 degrees, even in a gripper, or off the counter counts as dropped and fails the task.",
+      "assets": [
+        "MealBowl1",
+        "MealBowl2",
+        "MealBowl3",
+        "MealBowl4",
+        "StagingMat",
+        "ServingBoard"
+      ],
+      "success_detection": "no bowl dropped and every ordered meal served by the end of the episode, late or not (set down released and upright on the board, and still there or taken by the waiter). Temporal (stream): each order's meal on the board by its pickup",
+      "temporal_model": "the waiter takes the bowl on the board at each pickup and an overdue meal once it has rested on the board 1 s; 4 orders at every tier, pickups 4 / sqrt5 / 1.25 x the reference schedule 10.53 / 23.49 / 36.45 / 49.41 s (first pickup 10.53 s, then every 12.96 s: the tightest such schedule the slowest oracle meets): medium 23.55 / 52.53 / 81.5 / 110.48 s, hard 13.16 / 29.36 / 45.56 / 61.76 s; horizon 1.25 x the last pickup (easy 247.05 s, medium 138.1 s, hard 77.2 s), early end 2 s after the last pickup once all is served; per seed: wanted order, meal per counter slot, pose jitter",
+      "module": "roboclock.envs.household.c1_x5.task",
+      "scene": "roboclock.envs.household.c1_x5.scene",
+      "design": "c1_x5/design.json",
+      "initial_scene_sha256": "4446616c197ffe2eb6b27638447ccd31953482662d542efad2069bff7ff0a5c0",
+      "demo": {
+        "path": "data/household/x5_demos/C1",
+        "difficulty": "medium",
+        "seed": 0
+      }
+    },
+    {
+      "id": "C2",
+      "sheet_task": 19,
+      "category": "C",
+      "category_name": "throughput",
+      "name": "Pour cola into six glasses with two arms",
+      "goal": "Six guests are waiting. Pour cola from the two opened bottles into the six glasses in the row, each up to the white line, without spilling, and stand both bottles back on the counter, released. A glass counts with 80 to 105 ml in it (the line marks 90 ml: from 5 mm below it to 8 mm above); above that it cannot be corrected. Spilling 15 ml, moving a glass more than 3 cm or tipping it, or dropping a bottle fails the task. Fill all six glasses as quickly as possible.",
+      "assets": [
+        "BottleL",
+        "BottleR",
+        "Glass1",
+        "Glass2",
+        "Glass3",
+        "Glass4",
+        "Glass5",
+        "Glass6"
+      ],
+      "success_detection": "all six glasses served at the end (80-105 ml counted from the fluid, upright, held 1 s, nothing in the air), both bottles released upright on the counter; none dropped, no glass knocked, spill < 15 ml. Temporal: t_Q (all six served and both bottles back 1 s) within the tier budget",
+      "temporal_model": "PhysX particle fluid poured by tilting; volumes counted from particles; one run per seed to H = 5 t_o (t_o = 43.21 s), scored at every tier (T = 4 / sqrt5 / 1.25 t_o); ends early 2 s after all is done, or on a stall or a failure",
+      "module": "roboclock.envs.household.c2_x5.task",
+      "scene": "roboclock.envs.household.c2_x5.scene",
+      "design": "c2_x5/design.json",
+      "initial_scene_sha256": "fb49eef8626302f0f7d0a0852c829ac796e8c2e4de46585ca6815ad307a41922",
+      "demo": {
+        "path": "data/household/x5_demos/C2",
+        "difficulty": "medium",
+        "seed": 0
+      }
+    },
+    {
+      "id": "C3",
+      "sheet_task": 20,
+      "category": "C",
+      "category_name": "throughput",
+      "name": "Cutlery organization: sort the utensils into the drawer",
+      "goal": "Spoons, forks and knives are mixed on the table. Put each one into its compartment of the open drawer (each compartment already holds one of its kind). A utensil counts while it lies at rest, released, inside the compartment of its kind and below the tops of its walls: lying across a wall does not count. At the end none may be in a wrong compartment or off the counter, and the three utensils already in the drawer must stay in their compartments. Sort all of them as quickly as possible.",
+      "assets": [
+        "Drawer",
+        "Spoon1",
+        "Spoon2",
+        "Fork1",
+        "Fork2",
+        "Knife1",
+        "Knife2",
+        "Spoon3",
+        "Fork3",
+        "Knife3"
+      ],
+      "success_detection": "all 6 loose utensils released, resting inside the compartment of their kind below the wall tops at the end; none in a wrong compartment, none off the counter, reference utensils stay. Temporal: t_Q (first time all 6 sorted at once) within the tier budget",
+      "temporal_model": "one run per seed to H = 5 t_o (t_o = 25.97 s), scored at every tier (T = 4 / sqrt5 / 1.25 t_o); ends early 2 s after all 6 are sorted, or on a stall",
+      "module": "roboclock.envs.household.c3_x5.task",
+      "scene": "roboclock.envs.household.c3_x5.scene",
+      "design": "c3_x5/design.json",
+      "initial_scene_sha256": "70703ee0d973c822b49ebcda1c747f2c9f9418e6febc8e14379959248d432626",
+      "demo": {
+        "path": "data/household/x5_demos/C3",
+        "difficulty": "medium",
+        "seed": 0
+      }
+    }
+  ]
+}

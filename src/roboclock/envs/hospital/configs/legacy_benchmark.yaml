@@ -1,0 +1,236 @@
+sim:
+  physics_dt: 0.004
+  control_decimation: 5
+  camera_resolution:
+  - 960
+  - 720
+  settle_seconds: 0.5
+  placement_dwell: 0.2
+scene:
+  table_height: 0.75
+  table_center:
+  - 0.45
+  - 0.0
+  - 0.7
+  table_size:
+  - 1.0
+  - 1.1
+  - 0.1
+  robot_position:
+  - 0.0
+  - 0.0
+  - 0.75
+  camera_position:
+  - 1.65
+  - 1.4
+  - 2.15
+  camera_look_at:
+  - 0.45
+  - -0.04
+  - 1.03
+  camera_focal_length: 21.0
+  camera_horizontal_aperture: 36.0
+  spatial_jitter: 0.05
+  clutter:
+    enabled: true
+    count: 8
+    seed_offset: 202
+    source_clearance: 0.045
+    target_clearance: 0.045
+    pair_clearance: 0.012
+  mass_range:
+  - 0.035
+  - 0.075
+  friction_range:
+  - 0.6
+  - 1.0
+  light_intensity_range:
+  - 1800
+  - 2600
+visuals:
+  hdr_path: shared://hdr/studio_small_09_2k.hdr
+  hdr_intensity: 140.0
+  hdr_rotation: 35.0
+  key_intensity: 280.0
+  fill_intensity: 90.0
+  labels: true
+  ceiling_intensity: 90.0
+  beacon_intensity: 600.0
+  renderer: RaytracedLighting
+  path_tracing_samples: 512
+  path_tracing_spp: 8
+  path_tracing_bounces: 8
+  render_updates: 72
+  materials:
+    worktop:
+      texture_set: epoxy
+      uv_scale:
+      - 1.0
+      - 1.0
+      normal_strength: 0.18
+      roughness_map_weight: 0.5
+    steel:
+      texture_set: brushed_steel
+      uv_scale:
+      - 2.0
+      - 2.0
+      normal_strength: 0.2
+      roughness_map_weight: 0.65
+    aluminum:
+      texture_set: brushed_steel
+      uv_scale:
+      - 3.0
+      - 3.0
+      normal_strength: 0.15
+      roughness_map_weight: 0.45
+    polymer:
+      texture_set: powder_coat
+      uv_scale:
+      - 2.0
+      - 2.0
+      normal_strength: 0.18
+      roughness_map_weight: 0.5
+    wall:
+      texture_set: painted_plaster_wall
+      uv_scale:
+      - 0.5
+      - 0.5
+      normal_strength: 0.15
+      roughness_map_weight: 0.6
+      tint:
+      - 0.84
+      - 0.91
+      - 0.98
+    floor:
+      texture_set: grey_tiles
+      uv_scale:
+      - 0.75
+      - 0.75
+      normal_strength: 0.15
+      roughness_map_weight: 0.7
+physics:
+  contact_offset: 0.001
+  rest_offset: 0.0
+  solver_position_iterations: 16
+  solver_velocity_iterations: 4
+  minimum_grasp_time: 0.04
+  contact_force_threshold: 0.06
+  relative_hold_speed: 0.2
+  recovery_dwell: 0.3
+  catch_dwell: 0.25
+robot:
+  # Dual ARX X5 (roboclock.envs.lab.robot). Hospital tasks drive the left arm; its default mount is
+  # the former single-arm base at scene.robot_position. Tasks with far items move it forward so
+  # every item and target stays within the X5's ~0.7 m reach, and the idle right arm is moved off
+  # fixtures that cover its default spot (the B2 patient/AED, the C2 crash cart).
+  model: dual_arx_x5
+  mount_positions: [[0.0, 0.0, 1.05], [0.0, 0.38, 1.05]]
+  task_mount_positions:
+    A1: [[0.15, 0.0, 1.05], [0.0, 0.38, 1.05]]
+    B2: [[0.15, 0.05, 1.05], [0.84, 0.49, 1.05]]
+    B3: [[0.15, -0.10, 1.05], [0.0, 0.38, 1.05]]
+    C1: [[0.10, 0.0, 1.05], [0.0, 0.38, 1.05]]
+    C2: [[0.15, -0.10, 1.05], [0.0, -0.40, 1.05]]
+    C3: [[0.15, -0.05, 1.05], [0.0, 0.38, 1.05]]
+control:
+  max_cartesian_speed: 0.35
+  insertion_speed: 0.07
+  reactive_speed: 0.65
+  # Target lead over the measured joints per control period. The drives lag by
+  # kd/kp = 0.04 s, so the arm settles at speed * (1 - exp(-T/0.04)), about 1.13 rad/s.
+  joint_target_speed: 2.9
+  phase_timeout: 10.0
+# Only temporal parameters and placement tolerances change with difficulty.
+# Ranges are first-pass values; they have not been checked against a controller.
+difficulty:
+  easy:
+    orientation_tolerance: 0.3
+  medium:
+    orientation_tolerance: 0.2
+  hard:
+    orientation_tolerance: 0.12
+episode:
+  max_time: 120.0
+  window_start_range:
+  - 8.0
+  - 12.0
+  event_time_range:
+  - 4.0
+  - 10.0
+tasks:
+  A1:  # pharmacy requests: a bed's light turning green is a request arriving; its tray must be filled
+    # before the window closes. The last request is STAT: it arrives 0.3 gaps after the previous one
+    # with a 0.7x window, so its deadline is earlier than the previous request's. Measured on the
+    # oracle: a delivery takes ~4.5 s when idle over the vial and ~7.5 s back to back. Easy: requests
+    # arrive slower than that, so any order works. Medium and hard: they arrive faster, a queue builds,
+    # and serving in arrival order starts missing the STAT request.
+    num_items_range: [3, 4]
+    easy: {window_width: [20.0, 22.0], window_gap: [8.0, 9.0]}
+    medium: {window_width: [22.0, 24.0], window_gap: [4.0, 5.0]}
+    hard: {window_width: [24.0, 26.0], window_gap: [3.0, 4.0]}
+  A2:  # blood bag: t_place - t_remove < D; the bag is lifted out of the fridge drawer and hung on a hook
+    num_items_range: [1, 1]
+    easy: {transit_limit: [16.0, 19.0]}
+    medium: {transit_limit: [12.0, 14.0]}
+    hard: {transit_limit: [10.0, 11.0]}
+  A3:  # live procedure: the surgeon calls for one instrument per step at its window start (t_call);
+    # the window width is the response limit after the call, the gap is the time between calls.
+    # Measured on the oracle: a call is answered in 4.2-5.5 s.
+    num_items_range: [3, 3]
+    easy: {window_width: [10.0, 12.0], window_gap: [13.0, 15.0]}
+    medium: {window_width: [8.0, 9.5], window_gap: [11.0, 13.0]}
+    hard: {window_width: [6.5, 7.5], window_gap: [9.0, 11.0]}
+  A4:  # syringe doses: each has its own beyond-use time, t_place < T_exp, from episode start;
+    # the first expires at expiry_time and each later one expiry_gap after the previous
+    dose_prep: false  # true: each syringe is filled on a dock first (draw the dose), then delivered
+    num_items_range: [3, 3]
+    easy: {expiry_time: [20.0, 22.0], expiry_gap: [10.0, 11.0]}
+    medium: {expiry_time: [16.0, 17.0], expiry_gap: [8.0, 9.0]}
+    hard: {expiry_time: [13.0, 14.0], expiry_gap: [7.0, 8.0]}
+  B1:  # supply delivery: t_deliver - t_alarm < response_limit, for every alarm. Medium and hard have
+    # several beds alarming alarm_gap seconds apart, faster than one delivery takes; the last alarm is a
+    # critical code with 0.7x the limit. First-pass values; re-tune from measured response times.
+    num_items_range: [3, 3]
+    easy: {response_limit: [14.0, 18.0], alarm_gap: [8.0, 10.0], alarm_count: [1, 1]}
+    medium: {response_limit: [13.0, 15.0], alarm_gap: [4.0, 5.0], alarm_count: [2, 2]}
+    hard: {response_limit: [12.0, 14.0], alarm_gap: [3.0, 4.0], alarm_count: [3, 3]}
+  B2:  # cardiac arrest: pull the pad tab, put both pads on the chest marks, then press SHOCK within
+    # response_limit of the arrest. Needs about 7 s per pad, 6 s for the tab and 5 s for the press,
+    # plus the AED's 8 s analysis (aed_response.ANALYSIS; 2 s until 2026-11-16, when every limit below
+    # moved out by the same 6 s: 55-60 / 45-50 / 38-42 before). First-pass values; re-tune from
+    # measured response times.
+    num_items_range: [3, 3]
+    easy: {response_limit: [61.0, 66.0]}
+    medium: {response_limit: [51.0, 56.0]}
+    hard: {response_limit: [44.0, 48.0]}
+  B3:  # fire: press the alarm (within 40 % of the limit), pull both tabs, then lay the blanket over the burning dish within response_limit of the
+    # ignition. Needs about 6 s per tab and 8 s for the blanket. First-pass values; re-tune from measured times.
+    num_items_range: [3, 3]  # two tabs and the blanket
+    cover_radius: 0.045
+    easy: {response_limit: [50.0, 56.0]}
+    medium: {response_limit: [42.0, 46.0]}
+    hard: {response_limit: [34.0, 38.0]}
+  C1:  # STAT pharmacy order: every item in its order bin before cycle_time (the courier leaves)
+    num_items_range: [6, 6]
+    required_accuracy: null
+    easy: {cycle_time: [80.0, 90.0], required_rate_per_min: [0.5, 0.5]}
+    medium: {cycle_time: [68.0, 76.0], required_rate_per_min: [0.5, 0.5]}
+    hard: {cycle_time: [58.0, 64.0], required_rate_per_min: [0.5, 0.5]}
+  C2:  # crash-cart restock: every item in its bin before cycle_time (the next code); the episode ends at the last item or at cycle_time
+    num_items_range: [6, 6]
+    required_accuracy: null
+    easy: {cycle_time: [80.0, 90.0], required_rate_per_min: [0.5, 0.5]}
+    medium: {cycle_time: [68.0, 76.0], required_rate_per_min: [0.5, 0.5]}
+    hard: {cycle_time: [58.0, 64.0], required_rate_per_min: [0.5, 0.5]}
+  C3:  # sterilizer: load every instrument and press START before cycle_time; the episode ends at the press or at cycle_time
+    num_items_range: [4, 6]
+    required_accuracy: null
+    easy: {cycle_time: [62.0, 68.0], required_rate_per_min: [0.5, 0.5]}
+    medium: {cycle_time: [52.0, 58.0], required_rate_per_min: [0.5, 0.5]}
+    hard: {cycle_time: [44.0, 50.0], required_rate_per_min: [0.5, 0.5]}
+  C4:  # blood-tube triage (ward profile only); placeholder so every profile validates
+    num_items_range: [6, 6]
+    required_accuracy: null
+    easy: {cycle_time: [80.0, 90.0], required_rate_per_min: [0.5, 0.5]}
+    medium: {cycle_time: [68.0, 76.0], required_rate_per_min: [0.5, 0.5]}
+    hard: {cycle_time: [58.0, 64.0], required_rate_per_min: [0.5, 0.5]}

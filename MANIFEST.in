@@ -1,0 +1,8 @@
+include requirements.txt
+graft src/roboclock/assets
+graft src/roboclock/envs
+global-exclude *.pyc *.pyo
+prune src/roboclock/envs/household/assets/x5/lightwheel_kitchen
+include src/roboclock/simulators/isaac/embodiments/assets.json
+include src/roboclock/evaluation/model_speeds.yaml
+include src/roboclock/policies/teleop/index.html

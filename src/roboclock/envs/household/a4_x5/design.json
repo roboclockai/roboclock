@@ -1,0 +1,124 @@
+{
+  "id": "A4",
+  "revision": "R2.1 (2026-10-22): physics-driven layout revision",
+  "embodiment": "Dual ARX X5, stationary island mount (common rig: bases side by side at x=0.00 / 0.60 m, y=-0.255 m, 0.60 m apart, facing +y; RoboDojo head camera 0.04 m forward of the base midpoint, 0.543 m above the mount tops, 60 deg down, Gemini 345Lg 640x480; D435 wrist cameras on link6); ready pose q=[0, .94, 1.34, -1.40, 0, 0]",
+  "time_origin": "t=0 at the first agent observation; process and physics continue during agent deliberation",
+  "interface": "Agent/LLM action and observation interface intentionally undefined in this revision; see README",
+  "status": "design + static initial state + task/process/scoring model + Isaac Sim physics episode with a privileged oracle controller (sim.py), validated against the task model and an independent trajectory check, and recorded (one reference episode, seed 0)",
+  "title": "Pour 300 g of hot water and stop in time",
+  "category": "A temporal window (stop interval derived from flow)",
+  "household_need": "Recipes need an exact amount of water; overshoot cannot be undone.",
+  "instruction": "Pour 300 g (+/- 10 g) of water from the kettle into the glass jug on the scale, then set the kettle down upright on the counter and let go. Water runs out once the kettle tilts roughly 40 to 60 degrees toward its spout (further as it empties); what leaves while the spout's tip is not above the jug's mouth is spilled, and 5 g spilled fails the task. The kettle with its water weighs 1.5 to 1.9 kg. Someone is waiting: finish within 64 seconds, with the kettle standing released; the dose is read 3 s later.",
+  "core_interventions": [
+    "grasp the kettle handle (left) and lid knob (right)",
+    "raise the kettle above the jug rim, tilt to pour with the spout over the jug, return upright in time",
+    "place the kettle upright on the counter and release"
+  ],
+  "process": {
+    "state": "kettle volume V_k, jug mass m, spill",
+    "model": "q = c * max(0, theta - theta0(V_k))^1.5 ml/s (theta tilt), max ~40 ml/s; tail flow 0.3-0.6 s after crossing theta0 on the way back; scale shows round(m) with 0.3 s display lag",
+    "hidden": {
+      "V_k_ml": "U[700, 1100]",
+      "c": "nominal x U[0.85, 1.15]"
+    },
+    "nominal": {
+      "target_g": 300,
+      "tolerance_g": 10,
+      "budget_s": {"easy": 60, "medium": 46, "hard": 36},
+      "real_time_scale": "not time-compressed, but not sourced either: the pour runs in real time, 300 g takes at least 7.5 s at the 40 ml/s maximum (the order of the 3.2-8.7 s of human volume-targeted pours, Huang et al., arXiv 2011.10150; above the 24 g/s maximum measured for one gooseneck kettle), and the 60 / 46 / 36 s budget is calibrated on the reference controller (oracle; a reference level, not an optimal time), not taken from a real process"
+    },
+    "cue": "scale LCD reading (agent camera), jug graduations, visible stream"
+  },
+  "timing": {
+    "event": "final dose = scale reading 3 s after kettle is upright; completion time = kettle released upright",
+    "rule": "dose in [290, 310] g and completion <= the tier budget (easy 60 s, medium 46 s, hard 36 s; the instruction states it); topping up allowed; overshoot is final",
+    "budget_calibration": "2026-11-16 recalibration (was 60 / 45 / 30 s = 45 s / time_scale): the reference oracle's slowest kettle-down time over seeds 0-9, zero inference latency and control delay, is t = 28.69 s (seed 3) at every tier, since the tier does not change the pour; hard = max(t / 0.8, t + 0.3 s) = 35.86 s, rounded up to 36 s; easy kept at 60 s; medium = sqrt(60 x 36) = 46.5 s, rounded to 46 s",
+    "early": "under-dose (top-up costs time)",
+    "late": "over-dose (unrecoverable)"
+  },
+  "completion": {
+    "physical": [
+      "kettle released upright on counter",
+      "jug not moved off the scale",
+      "spill < 5 g"
+    ],
+    "temporal": "dose in tolerance within budget"
+  },
+  "failures": [
+    "overshoot > 310 g",
+    "spill >= 5 g",
+    "kettle tipped/dropped",
+    "budget exceeded"
+  ],
+  "permitted": [
+    "slow pouring",
+    "pausing",
+    "topping up"
+  ],
+  "prohibited": [
+    "pouring back out of the jug",
+    "moving the jug to the sink"
+  ],
+  "arm_roles": "left: kettle handle bar (one pad through the handle opening); right: lid knob (tool from the front-right, 20 deg down); both arms lift, tilt and set down the kettle together",
+  "demo_guidance": [
+    "Volume-conserving scalar flow model + cylinder stream visual; no fluid solver needed."
+  ],
+  "open_items": [
+    "kettle handle grasp width",
+    "authored glass jug and scale are proxies"
+  ],
+  "assets": [
+    {
+      "name": "Kettle",
+      "role": "cordless electric kettle, removed from base, filled with ~1.0 L hot water",
+      "source": "src/roboclock/envs/household/assets/x5/objects/kettle_0/kettle_0.usdc",
+      "size_m": [
+        0.2077,
+        0.1433,
+        0.23
+      ]
+    },
+    {
+      "name": "KitchenScale",
+      "role": "digital kitchen scale (authored proxy, readout is the dose cue)",
+      "source": "authored in a4_x5/scene.py (disclosed proxy)",
+      "size_m": [
+        0.19,
+        0.19,
+        0.022
+      ]
+    },
+    {
+      "name": "GlassJug",
+      "role": "graduated 500 ml glass jug (authored lathe proxy, OmniGlass)",
+      "source": "authored in a4_x5/scene.py (disclosed proxy)",
+      "size_m": [
+        0.1,
+        0.1,
+        0.135
+      ]
+    }
+  ],
+  "files": {
+    "task_model": "src/roboclock/envs/household/a4_x5/task.py",
+    "scene_builder": "src/roboclock/envs/household/a4_x5/scene.py",
+    "initial_state": "data/household/x5_initial/A4/",
+    "simulation": "src/roboclock/envs/household/a4_x5/sim.py",
+    "demo": "data/household/x5_demos/A4/"
+  },
+  "layout_revision": {
+    "why": [
+      "One X5 pinch on the handle cannot hold the full kettle (0.8 kg shell + 1.0 kg water) while tilting: the ~1.5-2 N m gravity torque about the pinch far exceeds the torsional capacity of two 15 x 10 mm pads at 20 N, so the kettle rotates out.",
+      "Top-down and jaw-along-x two-arm grasps were out of IK reach; front grasps (tool +y) through the handle opening and on the lid knob are reachable.",
+      "The spout reaches only 1.5 cm beyond the kettle body, so the base must clear the jug rim before the spout is over the jug; the pour point is 2.5 cm short of the jug axis and 3 cm above the rim so the left elbow keeps ~1 rad of joint margin at 83 deg tilt.",
+      "The scale display showed a fixed 0 g texture."
+    ],
+    "changes": [
+      "two-arm pour: left arm on the handle bar, right arm on the lid knob; the arms approach one after the other (their palms would meet mid-air)",
+      "kettle moved to body axis (0.30, 0.05); jug and scale moved to (0.51, 0.05) / (0.51, 0.03) beside it",
+      "scale LCD shows the live (lagged) reading with 7-segment digit bodies over a blank display texture",
+      "oracle speed-up (2026-11-04): kettle down 38.4 -> 25.3 s (seed 0) so the then hard budget of 30 s (now 36 s) is met with >= 12 % margin: faster approach, insert, lift and carry, pour 32 deg past the onset at 18 deg/s (was 25 at 12), tilt back at 20 deg/s (was 12), upright turn during the carry back, retreat straight out of the handle then up"
+    ],
+    "unchanged": "instruction, 300 +- 10 g target, budget (then 45 s at medium), spill limit, flow model and scoring"
+  }
+}

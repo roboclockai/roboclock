@@ -1,0 +1,298 @@
+{
+  "task_id": 48,
+  "embodiment": "dual_arx_x5",
+  "seed": 0,
+  "carton_xy_jitter_m": [
+    0.0,
+    0.0
+  ],
+  "start_s": 1.0,
+  "mass_scale": 1.0,
+  "bounds": {
+    "carton_xy_jitter_m": [
+      -0.001,
+      0.001
+    ],
+    "start_s": [
+      1,
+      2
+    ],
+    "mass_scale": [
+      0.9,
+      1.1
+    ],
+    "sku_orders": [
+      [
+        "A",
+        "B",
+        "A"
+      ],
+      [
+        "A",
+        "A",
+        "B"
+      ],
+      [
+        "B",
+        "A",
+        "A"
+      ]
+    ]
+  },
+  "randomization": {
+    "layout": false,
+    "timing": false,
+    "physical": false
+  },
+  "required_shelved_boxes": 3,
+  "physics_hz": 250,
+  "side_grasp_pitch_deg": 30.0,
+  "side_tool_offset_x_m": 0.15361589976775225,
+  "side_tool_offset_z_m": 0.022076215482045622,
+  "minimum_grasp_hand_N": 5.0,
+  "target_transport_hand_N": 8.0,
+  "lift_height_m": 0.055,
+  "transport_clearance_m": 0.03,
+  "minimum_source_lift_m": 0.04,
+  "grasp_geometry": "Original source finger STL/URDF at2mm closed command:30degree pitch gives13.31590mm inward reach and-2.07622mm contact height. Camera housing stays33mm behind the actual contact plane. No gripper mesh change.",
+  "operating_mode": "three_carton_fixed_workcell",
+  "budget_s": 90.0,
+  "runtime_joint_velocity_limit_rad_s": 0.7,
+  "runtime_finger_velocity_limit_m_s": 0.03,
+  "hold_validation": {
+    "dwell_s": 0.8,
+    "position_span_m": 0.0005,
+    "orientation_from_first_deg": 0.3,
+    "scope": "Continuous native pose window with both hands retaining contact and no pallet support; raw constraint-step velocities remain logged separately"
+  },
+  "scope": "Three free cartons, mixed A/B SKU, native supported correct-shelf placement within90s. Fixed cell; no mobile delivery required per review, October22.",
+  "assumptions": "Proposed rigid0.3kg filters carton; no cardboard deformation. Friction/mass are candidate parameters, not measured manufacturer data.",
+  "products": [
+    {
+      "id": 0,
+      "sku": "A",
+      "label": "BRAKE KITS / A",
+      "slot": "A-01",
+      "size_m": [
+        0.28,
+        0.1,
+        0.14
+      ],
+      "source_center_m": [
+        0.12,
+        0.91,
+        0.64
+      ],
+      "source_floor_m": 0.57,
+      "destination_center_xy_m": [
+        0.12,
+        1.19
+      ],
+      "destination_bounds_xy_m": [
+        [
+          -0.05,
+          1.01
+        ],
+        [
+          0.29,
+          1.28
+        ]
+      ],
+      "destination_floor_m": 0.775,
+      "lift_height_m": 0.23,
+      "minimum_source_lift_m": 0.205,
+      "source_clear_x_shift_m": 0.0,
+      "source_clear_y_m": 0.91,
+      "placement_tool_bias_xy_m": [
+        0.0,
+        0.0
+      ],
+      "transport_clearance_m": 0.03
+    },
+    {
+      "id": 1,
+      "sku": "A",
+      "label": "BRAKE KITS / A",
+      "slot": "A-01",
+      "size_m": [
+        0.28,
+        0.1,
+        0.14
+      ],
+      "source_center_m": [
+        0.12,
+        0.91,
+        0.64
+      ],
+      "source_floor_m": 0.57,
+      "destination_center_xy_m": [
+        0.12,
+        1.075
+      ],
+      "destination_bounds_xy_m": [
+        [
+          -0.05,
+          1.01
+        ],
+        [
+          0.29,
+          1.28
+        ]
+      ],
+      "destination_floor_m": 0.775,
+      "lift_height_m": 0.23,
+      "minimum_source_lift_m": 0.205,
+      "source_clear_x_shift_m": 0.0,
+      "source_clear_y_m": 0.91,
+      "placement_tool_bias_xy_m": [
+        0.0,
+        0.0
+      ],
+      "transport_clearance_m": 0.03
+    },
+    {
+      "id": 2,
+      "sku": "B",
+      "label": "FILTERS / B",
+      "slot": "B-01",
+      "size_m": [
+        0.28,
+        0.18,
+        0.26
+      ],
+      "source_center_m": [
+        0.12,
+        0.91,
+        0.58
+      ],
+      "source_floor_m": 0.45,
+      "destination_center_xy_m": [
+        0.12,
+        1.12
+      ],
+      "destination_bounds_xy_m": [
+        [
+          -0.18,
+          1.01
+        ],
+        [
+          0.42,
+          1.27
+        ]
+      ],
+      "destination_floor_m": 0.45,
+      "lift_height_m": 0.02,
+      "minimum_source_lift_m": 0.012,
+      "source_clear_x_shift_m": 0.0,
+      "source_clear_y_m": 0.91,
+      "placement_tool_bias_xy_m": [
+        0.0,
+        0.0
+      ],
+      "transport_clearance_m": 0.02
+    }
+  ],
+  "source_clear_y_m": 0.91,
+  "operation_required_boxes": 3,
+  "sku_order_sampling": "SeedSequence child3 permutation when layout randomization enabled; independent of timing/mass streams.",
+  "carton_trajectory_speed_m_s": {
+    "lift": 0.055,
+    "clear_source": 0.1,
+    "transfer_to_shelf": 0.08,
+    "lower": 0.05
+  },
+  "bimanual_command_tracking_gate_m": 0.01,
+  "retention_force_upper_N": 12.0,
+  "retention_outward_limit_m": 0.006,
+  "retention_outward_speed_m_s": 0.001,
+  "mobile_base_required": false,
+  "component_probe_index": 1,
+  "component_probe_goal": "shelf_arrival",
+  "component_preplaced_indices": [],
+  "grasp_force_profiles": [
+    {
+      "minimum_N": 5.0,
+      "target_N": 8.0,
+      "upper_N": 12.0,
+      "carry_target_N": 12.0,
+      "carry_upper_N": 18.0
+    },
+    {
+      "minimum_N": 5.0,
+      "target_N": 8.0,
+      "upper_N": 12.0,
+      "carry_target_N": 12.0,
+      "carry_upper_N": 18.0
+    },
+    {
+      "minimum_N": 5.0,
+      "target_N": 8.0,
+      "upper_N": 12.0,
+      "carry_target_N": 12.0,
+      "carry_upper_N": 18.0
+    }
+  ],
+  "empty_return_speed_m_s": 0.16,
+  "empty_return_lower_speed_m_s": 0.12,
+  "empty_return_waypoint_blend_m": 0.006,
+  "rig_center_m": [
+    0.12,
+    0.7,
+    0.79
+  ],
+  "fixed_mounts_m": {
+    "left": [
+      -0.18,
+      0.7,
+      0.79
+    ],
+    "right": [
+      0.42,
+      0.7,
+      0.79
+    ]
+  },
+  "clamp_tool_yaw_deg": {
+    "left": 0,
+    "right": 180
+  },
+  "prepose_spread_m": 0.02,
+  "prepose_rise_m": 0.05,
+  "magazine": {
+    "center_xy_m": [
+      0.12,
+      0.91
+    ],
+    "presentation_top_z_m": 0.71,
+    "footprint_half_xy_m": [
+      0.12,
+      0.09
+    ],
+    "raise_speed_m_s": 0.04,
+    "platform_size_m": [
+      0.3,
+      0.16,
+      0.02
+    ],
+    "scope": "Lift-table infeed: a top photo-eye raises the stack until the topmost carton still in the magazine reaches the presentation height; no product pose writes."
+  },
+  "shelf": {
+    "front_y_m": 1.01,
+    "lower_deck_z_m": 0.45,
+    "upper_deck_z_m": 0.775,
+    "lower_deck_size_m": [
+      0.62,
+      0.26
+    ],
+    "upper_deck_size_m": [
+      0.36,
+      0.27
+    ],
+    "scope": "Two-level slot unit on the rig centre line: A-01 upper deck (back/front), B-01 lower deck. The upper deck is narrower than the wrist span."
+  },
+  "empty_return_back_y_m": 0.9500000000000001,
+  "mounting_assumption": "Common Dual ARX rig (rig.py): bases 0.60 m apart facing +Y on 0.79 m fixed stands; head camera 0.04 m forward and 0.54 m above the base midpoint.",
+  "scene_adaptation": "Common-rig layout (2026-11-03): the recorded pallet and full-width rack cannot be served by a side-by-side rig with the unchanged end clamp (centre-line corridor only). Lift-table magazine + two-level centre-line slot unit; same cartons, sizes, masses, frictions, grasp geometry, force profiles, hold/placement windows and 90 s budget.",
+  "return_path": "Back out of the shelf at the release height to the magazine, then down to the next carton's pre-grasp once the magazine has presented it.",
+  "sha256": "9b350379619a8bff252c3c3ccc7a1113975abab3360b4e19d4fd5a40cb08e38e"
+}

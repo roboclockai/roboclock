@@ -1,0 +1,208 @@
+# Industry difficulty levels: easy / medium / hard.
+#
+# What changes with the level. A/B tasks: only the temporal requirement and the episode
+# budget change. C (throughput) tasks: nothing in the episode (docs/c-class-timing.md); every
+# C episode runs to the horizon H = 5 t_o of the task's frozen oracle time
+# (roboclock.evaluation.throughput.ORACLE_TIMES), and the level only picks the time tier
+# T = 4 / sqrt5 / 1.25 x t_o that fills temporal_success and joint_success. At a given seed,
+# layout, physics and event onsets are the same at every level: the resolver draws them
+# from the seed before this table is applied (tasks.make_task).
+#
+# How the values were chosen (recalibrated 2026-11-16):
+# - Each task has one temporal knob, taken from the requirement in configs/tasks.json.
+# - Reference: the scripted privileged oracle (a reference level, not an optimal time),
+#   holding its start pose until the cue, seeds 0-9 x easy/medium/hard, zero inference
+#   latency and zero control delay (simulation seconds). t = its slowest time over the
+#   seeds of the quantity the knob is compared against.
+# - hard = max(t / 0.8, t + 0.30 s), rounded up to 0.01 s; medium = sqrt(easy x hard),
+#   rounded to 0.01 s.
+# - easy (2026-11-23, user rule): the documented real-world upper time where one exists
+#   (A1, A3); otherwise 4 x t, capped where the scene's own process ends sooner (B1).
+#   Before, easy kept its approved value (A1 24, A3 20, B1 8.4, B2 3, B3 3 s).
+# - A window that is a physical consequence (A2's rotating sector) is not a free knob and
+#   keeps its values; its comment gives the oracle's margin.
+# - The approved values from tasks.json stay in reviewed.json / reviewed_nominal (the
+#   recorded replays); the "approved" notes below mark where the levels used to keep them.
+#
+# Budgets (max_time, s):
+# - A/B tasks: the budget is the latest time the requirement can still be met (latest
+#   event onset over the seed ranges plus the level's window or deadline), plus 1.5x the
+#   oracle's work from meeting the requirement to completion, plus the recorded runner's
+#   post-completion hold. Rounded up to 5 s.
+# - C tasks: no per-level values. Their tiers and horizon come from the frozen oracle time
+#   (docs/c-class-timing.md); the time limits that stood here (C1 120/100/80 s, C2 90/75/60,
+#   C3 and C4 135/112.5/90) were retired with score_version 2.
+#
+# Randomization: layout, timing and physical draws are on at every level. A task may turn
+# one off (tasks.<ID>.randomization) where the oracle showed that its bounds break the
+# setup; see docs/industry/README.md for the oracle validation. The difficulty
+# reviewed_nominal replays the recorded episodes unchanged and is not listed here.
+randomization: {layout: true, timing: true, physical: true}
+
+tasks:
+  A1:
+    # Zincate dip to rinse: whole-part exit from the zincate bath inside
+    # [process_min_s, process_min_s + window_width_s] after full immersion.
+    # Time scale: a zincate immersion dip is the pre-treatment that prepares aluminium for
+    # plating; it needs no current, like the scene's plain dip. Its real duration is 20-120 s
+    # (Rudy, "Aluminum Finishing: the Zincating Facts", Finishing and Coating, 2024) and
+    # 20-50 s for the first dip of a double-zincate cycle (US 5,182,006), followed by a water
+    # rinse; a chromate conversion dip on zinc plate takes 5-30 s (EPI E-Chrome 851-L data
+    # sheet). So the 20 s minimum immersion is a real duration; the window widths below are
+    # not taken from these sources. As nickel plating, the earlier description, the step
+    # would be about 60 times compressed.
+    # Code identifiers keep the earlier name (plating_task, plating_to_rinse).
+    # Since 2026-11-19 the dry part starts on the loading pad between the baths: the policy
+    # picks it up and lowers it into the bath, and full immersion starts the recipe clock
+    # (before, the part started immersed and the clock ran from reset).
+    # process_min_s stays seed-drawn (18-22 s, nominal 20). The oracle holds the immersed part
+    # and lifts 1 s after the window opens: it exits 22.10-25.64 s after immersion (3.67-3.73 s
+    # after the opening), seeds 0-9.
+    # The limit is the close, process_min_s + width, measured from full immersion; per seed
+    # hard needs width >= max(exit / 0.8, exit + 0.3) - process_min_s, largest at seed 4
+    # (exit 25.64 s, process_min_s 21.91 s): 10.14 s. (Before the pick-and-dip start the
+    # oracle's grasp inside the bath set the exit, 28.2-29.0 s, and hard was 17.07 s.)
+    # Oracle: immersion 30.2-30.5 s after reset, completion (rinse retention) about 27.7 s
+    # after the exit, hold 3 s.
+    # Budget: 1.5 x 30.5 + (22 + width) + 1.5 x (27.7 + 3) s.
+    # Easy since 2026-11-23: the first dip of a double-zincate cycle lasts at most 50 s
+    # (US 5,182,006), so the window closes 50 s after immersion at the longest minimum
+    # (process_min_s 22 s): width 28 s (4 x t would be 32.4 s and pass 50 s). Was 24 / 15.6 s.
+    easy:   {window_width_s: 28.0, max_time: 145.0}
+    medium: {window_width_s: 16.85, max_time: 135.0}
+    hard:   {window_width_s: 10.14, max_time: 125.0}
+  A2:
+    # Rotary pump loading: place the housing in the carrier while the carrier is inside
+    # the loading sector. The table is described as a rotary accumulation table: 5 deg/s is
+    # 0.83 rpm, where real ones run at 1-3 rpm (Mini-Mover: "Fixed Speed: 1 rpm or 3 rpm");
+    # 1 rpm (6 deg/s) is the nearest catalogued speed. The speed is not changed (see below).
+    # The table turns at the recorded 5 deg/s at every level; the knob
+    # is the window, and the sector is narrowed from its entry edge (-60 deg) while its
+    # exit edge stays at -120 deg. The green 60 deg ring and its posts are colliders and
+    # stay; a narrower level covers the closed part with a visual-only black mask and a
+    # white post at its entry edge, and the HMI and floor signs show its width and window.
+    # The oracle triggers on the carrier angle (-110..-90 deg), tracks the carrier and
+    # releases at -110.1..-110.4 deg, 1.9 s before the sector exit, at every level.
+    # Why not the table speed: the oracle is tuned to 5 deg/s. Faster (5.5, 6 deg/s), its
+    # tracking lag (~15 mm) touches the carrier while lowering; slower (3.3, 4 deg/s), the
+    # housing lands off the carrier's support and is never released.
+    # Easy is the approved window, then 1/1.25 and 1/1.5 of it: hard opens at -80 deg and
+    # the oracle releases after 75 % of its 8 s.
+    # The sector is physical (a sector of the rotating table), so the 2026-11-16
+    # recalibration keeps these values. Oracle, seeds 0-9: releases at -110.4..-111.0 deg
+    # (1.8-1.9 s before the -120 deg exit, 77-79 % of hard's 8 s); seed 2 releases at
+    # -119.2 deg (0.17 s before the exit, 98 %); seed 3 never places (fails every level).
+    # Budget: sector exit at the latest initial carrier angle ((163.6 + 120) / 5 s)
+    # + 1.5 x (0.3 s release-to-retention + 3 s hold), rounded up to 5 s. The exit edge
+    # is the same at every level, so is the budget.
+    # Layout and timing are randomized; physical stays off. Layout (since 2026-11-20): the
+    # housing and its infeed cradle pins move together by +-10 mm in x and y, so the casting
+    # rests on the pins as at the nominal spot (the old +-4 mm moved the housing alone and left
+    # it badly seated). Timing: +-10 deg initial table angle (the carrier reaches the sector
+    # +-2 s earlier or later). Physical stays off: the 0.284 kg housing of seed 1 (0.27-0.33 kg)
+    # slipped out of the grasp during the lift. Oracle with layout, seeds 0-4: see
+    # docs/industry/README.md (seed 2 loses the grasp in the carry; seed 3 fails as before).
+    randomization: {physical: false}
+    easy:   {window_s: 12.0, max_time: 65.0}   # approved: the 60 deg sector at 5 deg/s
+    medium: {window_s: 10.0, max_time: 65.0}   # 50 deg, -120..-70
+    hard:   {window_s: 8.0, max_time: 65.0}    # 40 deg, -120..-80
+  A3:
+    # Enclosure cover bonding: released, stable seating within
+    # [2, window_close_s] s after the hot-melt adhesive bead finishes (hot-melt data sheets
+    # give open times of about 15-40 s: Infinity Bond E2190 "<15 Seconds", 3M 3764 "40 s").
+    # The oracle cannot start before the dispenser clears; its seated release (the scored
+    # time) comes 12.79-13.17 s after the bead over seeds 0-9, so hard closes at
+    # 13.17 / 0.8 = 16.47 s. The approved 2-14 s left the oracle 94 %.
+    # Budget: (latest bead end 20 + 15.7 s) + close + 1.5 x (0.5 + 2.5 hold) s.
+    # Easy since 2026-11-23: the longest documented open time, 40 s (3M 3764); 4 x t would be
+    # 52.7 s, past it. Was 20 / 18.15 s.
+    easy:   {window_close_s: 40.0, max_time: 85.0}
+    medium: {window_close_s: 25.67, max_time: 70.0}
+    hard:   {window_close_s: 16.47, max_time: 60.0}  # approved was 14 (2-14 s)
+  B1:
+    # Cooling-water isolation: the valve must be fully closed (confirmed 0.15 s) within
+    # response_deadline_s of leak onset (onset seed-drawn, 20-24 s).
+    # The robot is described as the emergency shut-off for the coolant line: data sheets give
+    # 0.5-6 s for the 90 deg stroke of small actuated quarter-turn valves (e.g. Georg Fischer
+    # EA15/EA25 5 s, EA45 6 s). Those are stroke times alone; ours (6.28-8.4 s, 1.05-1.4x the
+    # longest stroke) also contains detection and the reach. As a manual operator response it has no source.
+    # The deadline is not a containment limit: the leak runs at 0.14 L/s, so the tray's 2.0 L
+    # limit is reached only about 14 s after onset (2.6 L capacity after about 19 s) and no
+    # level's deadline lets a passing run overflow it. (Before 2026-11 the leak ran at
+    # 0.4 L/s and the 2.6 L tray capped easy at 6 s; easy keeps that value.)
+    # Oracle: it holds the reset pose until the leak cue, then reaches, grasps and turns; the
+    # valve is confirmed closed 4.92-5.02 s after onset over seeds 0-9, so hard is
+    # 5.02 / 0.8 = 6.28 s. (The earlier oracle waited 2.5 cm above the handle and closed in
+    # 3.6 s.) That reaches the earlier easy (6 s), so easy was raised, keeping the earlier
+    # easy:hard ratio 6 / 4.5: 4/3 x 6.28 = 8.4 s (approved 2026-11-16).
+    # Budget: 24 + deadline + 1.5 x 2.5 s hold.
+    # Layout (since 2026-11-20): besides the grasp radius (0.15-0.17 m) the whole valve line
+    # (skid, piping, valve, leak nipple) moves by +-20 mm in x and y; the oracle grasps at the
+    # moved pivot. Oracle seeds 0-4 pass at every level.
+    # Easy since 2026-11-23: no document gives a response time; 4 x t = 20.1 s would let the
+    # tray reach its 2.0 L limit (about 14.3 s after onset at 0.14 L/s), so easy is capped at
+    # 14 s. Was 8.4 / 7.26 s.
+    easy:   {response_deadline_s: 14.0, max_time: 45.0}
+    medium: {response_deadline_s: 9.38, max_time: 40.0}
+    hard:   {response_deadline_s: 6.28, max_time: 35.0}
+  B2:
+    # Motor emergency stop: press the stop button to actuation (confirmed 0.2 s) within
+    # response_deadline_s of the red warning (onset seed-drawn, 14-18 s).
+    # Context: measured human emergency-stop button presses take about 0.2-0.9 s (Fukaya,
+    # RIIS-SRR-No.13, 1993; hand on or near the button, event expected), so 2-3 s is looser
+    # than a human response. ISO 13850 sets no operator reaction time.
+    # Oracle: it holds the reset pose until the warning; the stop is confirmed actuated
+    # 1.97-2.02 s after the warning over seeds 0-9, so hard is 2.024 / 0.8 = 2.53 s.
+    # (The earlier oracle waited at a pre-positioned standby and reacted in 0.8 s.)
+    # Budget: 18 + deadline + 1.5 x (0.5 motor stop + 2.5 hold) s.
+    # Easy since 2026-11-23: no documented limit, 4 x 2.024 = 8.1 s (was 3 / 2.75 s).
+    easy:   {response_deadline_s: 8.1, max_time: 35.0}
+    medium: {response_deadline_s: 4.53, max_time: 30.0}
+    hard:   {response_deadline_s: 2.53, max_time: 30.0}
+  B3:
+    # Bearing arrest and recovery: arrest the rolling bearing inside the safety zone within
+    # response_deadline_s of zone entry, then place it in the rework tray.
+    # Oracle: stable arrest confirmed 1.03-1.19 s after entry over seeds 0-9, so hard is
+    # max(1.192 / 0.8, 1.192 + 0.3) = 1.50 s; recovery to tray retention takes 26.6 s more.
+    # What the deadline measures: an un-braked bearing crosses the 0.3 m zone in
+    # 0.74-0.79 s, so the brake must be in the lane within ~0.8 s at every level. The
+    # deadline bounds the time to a *stable* arrest: an active brake settles in about
+    # 1.1 s, while a bearing that rolls into a resting hand (the hold policy, seed 0)
+    # settles only 6.2 s after entry and fails every level.
+    # Easy keeps the approved 3 s.
+    # Budget: entry (<= 10 s) + deadline + 1.5 x (26.6 + 2.5 hold) s.
+    # Layout and timing are randomized; physical stays off (seed 0's draw, mass x1.07 and
+    # friction 0.233, gave an unexpected contact while the left hand closed). Layout (on since
+    # 2026-11-20): gate release x +-5 mm, lane y +-2 mm, outfeed source x +-5 mm. With layout
+    # the arrested bearing's place and yaw in the lane vary, and the oracle's two-hand hand-off
+    # is sensitive to them: seeds 2 and 3 fail (the closing left fingers meet the braking right
+    # fingers); see docs/industry/README.md.
+    randomization: {physical: false}
+    # Easy since 2026-11-23: no documented limit, 4 x 1.192 = 4.77 s (was 3 / 2.12 s).
+    easy:   {response_deadline_s: 4.77, max_time: 60.0}
+    medium: {response_deadline_s: 2.67, max_time: 60.0}
+    hard:   {response_deadline_s: 1.5, max_time: 60.0}
+  # C tasks: only randomization overrides. t_o (s): slowest successful oracle seed, E1 2026-11-16:
+  # C1 64.50, C2 45.32, C3 69.36, C4 81.46.
+  C1:
+    # Maintenance kitting: 2 complete kits (6 components). Every part in the scene is
+    # needed; the oracle builds both kits in parallel.
+    {}
+  C2:
+    # Carton putaway: 3 cartons on their matching shelves. The oracle credits at
+    # 15.3 / 32.3 / 43.1 s.
+    # Layout (on since 2026-11-20): the infeed stack moves by +-10 mm in x and y (all three
+    # cartons together; was +-1 mm). The SKU-order permutation that used to ride on the layout
+    # flag is a separate resolver option (sku_order), off in evaluation: the scripted oracle is
+    # built for A, A, B and failed every permuted order.
+    {}
+  C3:
+    # Three-side inspection: 3 parts inspected (three faces each) and sorted by their QC
+    # lamp. The seed's PASS/REJECT pattern changes the oracle's paths.
+    {}
+  C4:
+    # Eyeshadow palettes: 2 complete four-colour palettes delivered. The two arms work in
+    # parallel and deliver at 79.8 / 80.1 s.
+    # Layout (on since 2026-11-20): every feeder pan and its post +-2 mm in x and y (was +-0.8 mm). With
+    # all three draws seeds 0-4 pass (the layout-off baseline stalls on seeds 0 and 2).
+    {}

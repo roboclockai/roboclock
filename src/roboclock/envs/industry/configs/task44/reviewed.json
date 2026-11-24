@@ -1,0 +1,38 @@
+{
+  "task_id": 44,
+  "seed": 0,
+  "embodiment": "dual_arx_x5",
+  "grasp_radius_m": 0.16,
+  "leak_onset_s": 22.0,
+  "joint_friction_coefficient": 0.015,
+  "response_deadline_s": 5.0,
+  "closed_threshold_deg": 89.0,
+  "confirmation_dwell_s": 0.15,
+  "estimated_leak_flow_l_s": 0.14,
+  "estimated_spill_limit_l": 2.0,
+  "spill_model": "Idealized constant-flow volume integrated over measured leak duration; geometry-fitted water visualization, not fluid dynamics. The response deadline remains the score; at this flow the spill limit is reached only after about 14 s.",
+  "randomization": {
+    "layout": false,
+    "timing": false,
+    "physical": false
+  },
+  "bounds": {
+    "grasp_radius_m": [
+      0.15,
+      0.17
+    ],
+    "leak_onset_s": [
+      20,
+      24
+    ],
+    "joint_friction_coefficient": [
+      0.01,
+      0.02
+    ]
+  },
+  "independence": "Separate SeedSequence layout/temporal-event/physical streams",
+  "scoring": "Native valve angle at least89deg (90deg mechanical limit), confirmed0.15s within5s of observable leak onset, with post-event native finger contact and retained closed release",
+  "assumptions": "Original complete valve geometry and unactuated quarter-turn joint; dimensionless native joint friction is a declared demonstration parameter, not calibrated seal torque. Leak cue is symbolic and angle-driven.",
+  "controller": "Privileged native-state bounded joint-drive oracle; not a trained policy",
+  "sha256": "b807f21065618e0b06c274d1d31c8c1b34c1b049afe2eb8d5b866117f3843a03"
+}

@@ -1,0 +1,242 @@
+{
+ "hospital_A1": {
+  "episodes": 14,
+  "changed": 0
+ },
+ "hospital_A2": {
+  "episodes": 14,
+  "changed": 0
+ },
+ "hospital_A3": {
+  "episodes": 14,
+  "changed": 0
+ },
+ "hospital_B1": {
+  "episodes": 14,
+  "changed": 0
+ },
+ "hospital_B2": {
+  "episodes": 14,
+  "changed": 0
+ },
+ "hospital_B3": {
+  "episodes": 14,
+  "changed": 0
+ },
+ "hospital_B4": {
+  "episodes": 14,
+  "changed": 0
+ },
+ "hospital_B5": {
+  "episodes": 14,
+  "changed": 0
+ },
+ "hospital_B6": {
+  "episodes": 14,
+  "changed": 0
+ },
+ "hospital_B7": {
+  "episodes": 14,
+  "changed": 0
+ },
+ "hospital_C1": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "hospital_C2": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "hospital_C3": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "hospital_C4": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "household_A1": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "household_A2": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "household_A3": {
+  "episodes": 13,
+  "changed": 13
+ },
+ "household_A4": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "household_B1": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "household_B2": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "household_B3": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "household_C1": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "household_C2": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "household_C3": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "industry_A1": {
+  "episodes": 12,
+  "changed": 12
+ },
+ "industry_A2": {
+  "episodes": 12,
+  "changed": 12
+ },
+ "industry_A3": {
+  "episodes": 12,
+  "changed": 12
+ },
+ "industry_B1": {
+  "episodes": 12,
+  "changed": 12
+ },
+ "industry_B2": {
+  "episodes": 12,
+  "changed": 12
+ },
+ "industry_B3": {
+  "episodes": 12,
+  "changed": 12
+ },
+ "industry_C1": {
+  "episodes": 12,
+  "changed": 12
+ },
+ "industry_C2": {
+  "episodes": 12,
+  "changed": 12
+ },
+ "industry_C3": {
+  "episodes": 12,
+  "changed": 12
+ },
+ "industry_C4": {
+  "episodes": 12,
+  "changed": 12
+ },
+ "lab_A1": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "lab_A2": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "lab_A3": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "lab_A4": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "lab_A5": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "lab_A6": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "lab_B1": {
+  "episodes": 14,
+  "changed": 0
+ },
+ "lab_B2": {
+  "episodes": 14,
+  "changed": 0
+ },
+ "lab_B3": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "lab_B4": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "lab_B5": {
+  "episodes": 14,
+  "changed": 0
+ },
+ "lab_B6": {
+  "episodes": 14,
+  "changed": 0
+ },
+ "lab_B7": {
+  "episodes": 14,
+  "changed": 0
+ },
+ "lab_C1": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "lab_C2": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "lab_C3": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "sports_A1": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "sports_A2": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "sports_A3": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "sports_B1": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "sports_B2": {
+  "episodes": 13,
+  "changed": 13
+ },
+ "sports_B3": {
+  "episodes": 14,
+  "changed": 14
+ },
+ "sports_B4": {
+  "episodes": 12,
+  "changed": 12
+ },
+ "sports_C1": {
+  "episodes": 12,
+  "changed": 12
+ },
+ "sports_C2": {
+  "episodes": 12,
+  "changed": 12
+ },
+ "sports_C3": {
+  "episodes": 12,
+  "changed": 12
+ }
+}

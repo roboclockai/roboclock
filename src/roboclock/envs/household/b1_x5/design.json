@@ -1,0 +1,102 @@
+{
+  "id": "B1",
+  "revision": "R4: delayed sudden water surge",
+  "embodiment": "Dual ARX X5, stationary island mount (common rig: bases side by side at x=0.00 / 0.60 m, y=-0.255 m, 0.60 m apart, facing +y; RoboDojo head camera 0.04 m forward of the base midpoint, 0.543 m above the mount tops, 60 deg down, Gemini 345Lg 640x480; D435 wrist cameras on link6); ready pose q=[0, .94, 1.34, -1.40, 0, 0]",
+  "time_origin": "t=0 at the first agent observation; process and physics continue during agent deliberation",
+  "interface": "Agent/LLM action and observation interface intentionally undefined in this revision; see README",
+  "status": "design + static initial state + task/process/scoring model + Isaac Sim physics episode with a privileged oracle controller (sim.py), validated against the task model and an independent trajectory check, and recorded (one reference episode, seed 0)",
+  "title": "Shut off a sudden water surge before the bowl overflows",
+  "category": "B event-reactive",
+  "household_need": "React to a sudden abnormal water surge and shut the valve before excessive overflow.",
+  "instruction": "The gentle faucet stream suddenly surges. Wait for the surge, then shut it off; half a litre of overflow fails. The lever is the short rod right of the faucet neck. It cannot be pressed down: push its top about 2 cm sideways toward the neck (to the left, seen from the robot) until it stands upright. Then let go: it must stay shut and untouched for 1 second.",
+  "core_interventions": [
+    "push the faucet lever to closed and release"
+  ],
+  "process": {
+    "state": "water in the bowl V, spilled volume O",
+    "model": "Q_in = lever opening * time_scale * (0.025 L/s before surge, 0.45 L/s after surge); integrate bowl volume and overflow. Abnormal supply fault, not normal rated flow.",
+    "hidden": {
+      "headroom_l": "U[0.8, 1.4] L",
+      "surge_time": "U[1.8, 3.0] s; nominal 2 s"
+    },
+    "nominal": {
+      "headroom_l": 1.2,
+      "surge_time": 2.0,
+      "normal_flow_l_s": 0.025,
+      "inflow_l_s": 0.45
+    },
+    "cue": "Gentle stream abruptly becomes a thick, pulsing water column; bowl level and spill follow integrated volume."
+  },
+  "timing": {
+    "event": "effective closure = Q_in < 0.005 L/s sustained 1 s after hand release",
+    "rule": "loss = spilled volume O at end; O = 0 full score, O >= 0.5 L fail"
+  },
+  "completion": {
+    "physical": [
+      "lever closed by robot contact",
+      "hand released"
+    ],
+    "temporal": "spilled volume O < 0.5 L (graded)"
+  },
+  "failures": [
+    "O >= 0.5 L",
+    "faucet reopened"
+  ],
+  "permitted": [],
+  "prohibited": [
+    "pre-event action"
+  ],
+  "arm_roles": "right: lever (single arm)",
+  "demo_guidance": [
+    "The native single-lever handle is re-authored as FaucetLever: a 0.08 kg rigid body on a damped revolute hinge about y, 0-15 deg; flow u = tilt / 15 deg.",
+    "The right arm pushes the rod (1 cm, local x 9-19 mm) on its +x face 2 cm below the tip, leading the measured tilt by 4 deg; the bounding-box top skims over the rod.",
+    "The water surface, bubbles, stream and spill are driven by the task-model cues; the stream ends on the water surface."
+  ],
+  "open_items": [
+    "the bowl is a fixed collider: the water adds no load and a push does not move it"
+  ],
+  "assets": [
+    {
+      "name": "Sink",
+      "role": "native island sink with pull-down faucet",
+      "source": "src/roboclock/envs/household/assets/x5/lightwheel_kitchen/Collected_KitchenRoom/Sink054/Sink054.usd",
+      "size_m": [
+        0.8745,
+        0.5377,
+        0.5869
+      ]
+    },
+    {
+      "name": "WaterBowl",
+      "role": "mixing bowl in the basin under the spout (fixed static collider)",
+      "source": "src/roboclock/envs/household/assets/x5/objects/bowl_1/bowl_1.usdc, scaled x1.775 across and x2.727 in height",
+      "size_m": [
+        0.235,
+        0.235,
+        0.15
+      ]
+    },
+    {
+      "name": "WaterSurface",
+      "role": "surface of the water, follows the bowl profile",
+      "source": "authored in b1_x5/scene.py (disclosed proxy)"
+    },
+    {
+      "name": "WaterAeration",
+      "role": "bubbles where the stream hits the water",
+      "source": "authored in b1_x5/scene.py (disclosed proxy)"
+    },
+    {
+      "name": "Spill",
+      "role": "water over the rim and on the basin floor, shown only after an overflow",
+      "source": "authored in b1_x5/scene.py (disclosed proxy)"
+    }
+  ],
+  "files": {
+    "task_model": "src/roboclock/envs/household/b1_x5/task.py",
+    "scene_builder": "src/roboclock/envs/household/b1_x5/scene.py",
+    "initial_state": "data/household/x5_initial/B1/",
+    "simulation": "src/roboclock/envs/household/b1_x5/sim.py",
+    "demo": "data/household/x5_demos/B1/"
+  }
+}

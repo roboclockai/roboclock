@@ -1,0 +1,38 @@
+{
+  "task_id": 45,
+  "seed": 0,
+  "embodiment": "dual_arx_x5",
+  "button_xy_offset_m": [
+    0.0,
+    0.0
+  ],
+  "warning_onset_s": 16.0,
+  "button_spring_N_m": 250.0,
+  "response_deadline_s": 3.0,
+  "trigger_depth_m": 0.008,
+  "confirmation_dwell_s": 0.2,
+  "randomization": {
+    "layout": false,
+    "timing": false,
+    "physical": false
+  },
+  "bounds": {
+    "button_xy_offset_m": [
+      -0.008,
+      0.008
+    ],
+    "warning_onset_s": [
+      14,
+      18
+    ],
+    "button_spring_N_m": [
+      225,
+      275
+    ]
+  },
+  "independence": "Separate SeedSequence layout/event/physical streams",
+  "scoring": "Native8mm button depression with real finger contact sustained0.2s within3s of visible anomaly; native motor brake and withdrawal required",
+  "assumptions": "Declared10mm spring travel,5N spring cap; 15rad/s nominal drive; no calibrated failure/vibration model. Source motor/button geometry and source robot operating caps retained.",
+  "controller": "Privileged-state bounded joint-drive oracle, not a trained policy",
+  "sha256": "8655f5bf5b3f1c1ed52a40aeb3011a16359f80e56714677dd64f7b1f91815f49"
+}

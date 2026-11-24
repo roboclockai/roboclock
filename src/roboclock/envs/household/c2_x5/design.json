@@ -1,0 +1,173 @@
+{
+ "id": "C2",
+ "revision": "R4 (2026-11-03): glasses in one row, cooktop and pan removed, cola as a PhysX particle fluid, common rig (bases 0.60 m apart)",
+ "embodiment": "Dual ARX X5 on the common rig: bases x = 0.00 / 0.60 m, y = -0.255 m, facing +y; head camera from x5/rig.py",
+ "time_origin": "t=0 at the first agent observation; process and physics continue during agent deliberation",
+ "interface": "Shared X5 action/observation interface (docs/household/x5-task-interface.md)",
+ "status": "design + static initial state + task/process/scoring model + Isaac Sim physics episode with a privileged oracle controller (sim.py), validated against the task model and an independent trajectory check, and recorded (one reference episode, seed 0)",
+ "title": "Pour cola into six glasses with two arms",
+ "category": "C qualified throughput (parallel processes)",
+ "household_need": "Drinks for six guests: pour all six glasses as quickly as possible, without spilling.",
+ "instruction": "Six guests are waiting. Pour cola from the two opened bottles into the six glasses in the row, each up to the white line, without spilling, and stand both bottles back on the counter, released. A glass counts with 80 to 105 ml in it (the line marks 90 ml: from 5 mm below it to 8 mm above); above that it cannot be corrected. Spilling 15 ml, moving a glass more than 3 cm or tipping it, or dropping a bottle fails the task. Fill all six glasses as quickly as possible.",
+ "core_interventions": [
+  "pick up an opened bottle",
+  "tilt it until the cola flows and keep the stream in the glass",
+  "tip it back in time to stop at the line",
+  "move on to the next glass",
+  "work both arms at once",
+  "stand the bottle back upright"
+ ],
+ "process": {
+  "state": "cola particles (PhysX PBD fluid, 3 mm, about 27 ul each), counted in each glass, each bottle, the air and on the counter",
+  "model": "physical: the cola flows out of a bottle's neck only when it is tilted far enough, falls as a stream and settles in a glass or on the counter; the stream does not stop at once when the bottle tips back",
+  "hidden": {},
+  "nominal": {
+   "fill_line_ml": 90,
+   "band_ml": [
+    80,
+    105
+   ],
+   "glass_rim_ml": 170,
+   "bottle_ml": 310,
+   "spill_limit_ml": 15
+  },
+  "cue": "the rendered cola (isosurface) in each glass against the white line, and the stream"
+ },
+ "timing": {
+  "event": "a glass is served once its cola has held in the band for 1 s with no cola in the air, upright and in place",
+  "rule": "C-class batch task (score_version 2, docs/c-class-timing.md): the six glasses are the jobs; t_Q is the first time all six are served and both bottles stand released for 1 s (all_served). One run per seed to H = 5 t_o (t_o = 43.29 s: 216.45 s at every difficulty), scored at every tier, T = 4 / 2 / 1 t_o (easy / medium / hard); the difficulty changes nothing in the episode. Ends early 2 s after all is done, on a stall (from T_medium, no new glass served for max(0.5 t_o, 1.5 T_easy / 6) = 1.0 t_o, while glasses remain) or on a failure. Until 2026-11-09: a serving window of 90 s / time_scale"
+ },
+ "completion": {
+  "physical": [
+   "all six glasses served at the end (in the band, upright)",
+   "both bottles released upright on the counter",
+   "no bottle dropped, no glass knocked",
+   "spill under 15 ml"
+  ],
+  "temporal": "t_Q within the tier budget T = m x t_o (no physical terms)"
+ },
+ "failures": [
+  "bottle dropped or tipped over",
+  "glass knocked over or moved > 3 cm",
+  "spill >= 15 ml"
+ ],
+ "permitted": [
+  "either arm for any glass",
+  "pausing a pour",
+  "topping a glass up later"
+ ],
+ "prohibited": [
+  "filling a glass above the band (it is not served)"
+ ],
+ "arm_roles": "Each arm pours its own bottle into the three glasses outside its base, inner glass first; both work at the same time",
+ "demo_guidance": [
+  "Pinch the bottle body 12 cm up, tool 25 deg down; the bottle turns about its own axis between glasses so each pour uses its reach-screened tool azimuth.",
+  "Carry the bottle with its base above the rims; tilt it outward along the row while the mouth moves over the glass; raise it wherever any part would come within 12 mm of another glass's rim.",
+  "Servo the tilt to a measured outflow of 30 ml/s; tip back once the glass, the cola in the air and 0.35 s of flow reach the line. Each arm's inner glass is reachable only to 100 deg and is poured first, from the full bottle."
+ ],
+ "open_items": [
+  "the fluid has no foam, carbonation or air entry (no glugging)",
+  "bottles and glasses are rigid lathe proxies; the bottle is opaque",
+  "the outer glasses fall outside the shared head camera's field of view"
+ ],
+ "assets": [
+  {
+   "name": "BottleL",
+   "role": "opened cola bottle for the left arm (54 x 315 mm lathe proxy, no cap; the cola is a particle fluid added in simulation)",
+   "source": "authored in c2_x5/scene.py (disclosed proxy)",
+   "size_m": [
+    0.0548,
+    0.0548,
+    0.315
+   ]
+  },
+  {
+   "name": "BottleR",
+   "role": "opened cola bottle for the right arm (54 x 315 mm lathe proxy, no cap; the cola is a particle fluid added in simulation)",
+   "source": "authored in c2_x5/scene.py (disclosed proxy)",
+   "size_m": [
+    0.0548,
+    0.0548,
+    0.315
+   ]
+  },
+  {
+   "name": "Glass1",
+   "role": "tumbler 1 (about 170 ml to the rim, white line at 90 ml; lathe proxy, OmniGlass)",
+   "source": "authored in c2_x5/scene.py (disclosed proxy)",
+   "size_m": [
+    0.0586,
+    0.0586,
+    0.085
+   ]
+  },
+  {
+   "name": "Glass2",
+   "role": "tumbler 2 (about 170 ml to the rim, white line at 90 ml; lathe proxy, OmniGlass)",
+   "source": "authored in c2_x5/scene.py (disclosed proxy)",
+   "size_m": [
+    0.0586,
+    0.0586,
+    0.085
+   ]
+  },
+  {
+   "name": "Glass3",
+   "role": "tumbler 3 (about 170 ml to the rim, white line at 90 ml; lathe proxy, OmniGlass)",
+   "source": "authored in c2_x5/scene.py (disclosed proxy)",
+   "size_m": [
+    0.0586,
+    0.0586,
+    0.085
+   ]
+  },
+  {
+   "name": "Glass4",
+   "role": "tumbler 4 (about 170 ml to the rim, white line at 90 ml; lathe proxy, OmniGlass)",
+   "source": "authored in c2_x5/scene.py (disclosed proxy)",
+   "size_m": [
+    0.0586,
+    0.0586,
+    0.085
+   ]
+  },
+  {
+   "name": "Glass5",
+   "role": "tumbler 5 (about 170 ml to the rim, white line at 90 ml; lathe proxy, OmniGlass)",
+   "source": "authored in c2_x5/scene.py (disclosed proxy)",
+   "size_m": [
+    0.0586,
+    0.0586,
+    0.085
+   ]
+  },
+  {
+   "name": "Glass6",
+   "role": "tumbler 6 (about 170 ml to the rim, white line at 90 ml; lathe proxy, OmniGlass)",
+   "source": "authored in c2_x5/scene.py (disclosed proxy)",
+   "size_m": [
+    0.0586,
+    0.0586,
+    0.085
+   ]
+  }
+ ],
+ "files": {
+  "task_model": "src/roboclock/envs/household/c2_x5/task.py",
+  "scene_builder": "src/roboclock/envs/household/c2_x5/scene.py",
+  "simulation": "src/roboclock/envs/household/c2_x5/sim.py",
+  "demo": "data/household/x5_demos/C2/"
+ },
+ "layout_revision": {
+  "why": [
+   "User (2026-11-03): glasses side by side, the cooktop in the middle removed, only cups and bottles; cola simulated as a fluid.",
+   "The project moved every household task to one rig (bases 0.60 m apart); C2 was screened for it."
+  ],
+  "changes": [
+   "bare island counter; six tumblers (about 170 ml, white line at 90 ml) in one row 10 cm apart, three outside each base",
+   "cola is a PhysX particle fluid inside two hollow bottles (about 310 ml each); every scored volume is a particle count",
+   "the scalar flow and foam model of R3 is gone; no hidden process parameters remain, difficulty sets only the window"
+  ],
+  "unchanged": "kitchen background, overview camera, X5 embodiment and rates, scoring by served glasses in a window"
+ }
+}

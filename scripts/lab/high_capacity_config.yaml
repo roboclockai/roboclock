@@ -1,0 +1,123 @@
+sim:
+  physics_dt: 0.008333333333333333
+  control_decimation: 4
+  camera_resolution:
+  - 960
+  - 720
+  settle_steps: 60
+  placement_dwell: 0.2
+scene:
+  table_height: 0.75
+  table_center:
+  - 0.45
+  - 0.0
+  - 0.7
+  table_size:
+  - 1.0
+  - 1.1
+  - 0.1
+  robot_position:
+  - 0.0
+  - 0.0
+  - 0.75
+  camera_position:
+  - 1.5
+  - 1.2
+  - 2.1
+  camera_look_at:
+  - 0.38
+  - -0.02
+  - 1.08
+  camera_focal_length: 24.0
+  camera_horizontal_aperture: 36.0
+  spatial_jitter: 0.05
+  mass_range:
+  - 0.035
+  - 0.075
+  friction_range:
+  - 0.6
+  - 1.0
+  light_intensity_range:
+  - 1800
+  - 2600
+visuals:
+  hdr_path: assets/hdr/studio_small_09_1k.hdr
+  hdr_intensity: 220.0
+  hdr_rotation: 35.0
+  key_intensity: 850.0
+  fill_intensity: 250.0
+  labels: true
+physics:
+  contact_offset: 0.001
+  rest_offset: 0.0
+  solver_position_iterations: 16
+  solver_velocity_iterations: 4
+  minimum_grasp_time: 0.04
+  contact_force_threshold: 0.06
+  relative_hold_speed: 0.2
+  recovery_dwell: 0.3
+  catch_dwell: 0.25
+control:
+  max_cartesian_speed: 0.35
+  insertion_speed: 0.07
+  reactive_speed: 0.65
+  joint_target_speed: 2.0
+  phase_timeout: 10.0
+difficulty:
+  easy:
+    window_width:
+    - 10.0
+    - 12.0
+    reaction_latency:
+    - 3.5
+    - 4.5
+    transfer_deadline:
+    - 12.0
+    - 15.0
+    required_rate:
+    - 0.035
+    - 0.045
+    position_tolerance: 0.025
+    orientation_tolerance: 0.3
+  medium:
+    window_width:
+    - 5.0
+    - 7.0
+    reaction_latency:
+    - 2.0
+    - 3.0
+    transfer_deadline:
+    - 8.0
+    - 10.0
+    required_rate:
+    - 0.06
+    - 0.08
+    position_tolerance: 0.018
+    orientation_tolerance: 0.2
+  hard:
+    window_width:
+    - 2.0
+    - 3.0
+    reaction_latency:
+    - 0.8
+    - 1.5
+    transfer_deadline:
+    - 5.0
+    - 7.0
+    required_rate:
+    - 0.1
+    - 0.13
+    position_tolerance: 0.012
+    orientation_tolerance: 0.12
+episode:
+  window_start_range:
+  - 8.0
+  - 12.0
+  event_time_range:
+  - 4.0
+  - 10.0
+  num_samples_range:
+  - 50
+  - 50
+  required_accuracy: 0.95
+  max_time: 120.0

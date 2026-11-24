@@ -1,0 +1,28 @@
+# Fastest surveyed decode speed of each model a roboclock agent queries.
+#
+# With --inference-latency ideal, each model query is charged
+#     L = ttft_s + output_tokens / max_tokens_per_s
+# instead of the time the query took on our hardware. output_tokens is the reply's
+# completion token count, thinking tokens included.
+#
+# - Keys are served model names, the "model" field of the request (VISION_LLM_MODEL).
+# - Speeds are for one request (one stream), not a server's aggregate throughput.
+# - Keep each number's source and survey date next to it.
+# - ttft_s is the time to the first token. It is 0 here, so ideal mode charges decoding
+#   only, at the fastest surveyed rate.
+
+models:
+  Qwen/Qwen3.8-27B:
+    max_tokens_per_s: 1850
+    ttft_s: 0.0
+    source: >-
+      Cerebras inference docs, model overview: qwen-3.8-27b at "~1850" tokens/s
+      (https://inference-docs.cerebras.ai/models/overview)
+    surveyed: 2026-11-06
+    notes: >-
+      Vendor figure. Other numbers surveyed the same day, all for one request:
+      - Cerebras launch coverage said about 1500 tokens/s. One Hacker News user measured a
+        median of 890 tokens/s, with 0.64 s to the first token.
+      - Artificial Analysis tracks GPU clouds at up to about 190 tokens/s (Crusoe, Multiverse
+        Computing), with about 0.66 s to the first token.
+      - On our single A100 in bf16 we get 27.9 tokens/s plus 0.59 s per request.

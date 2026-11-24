@@ -1,0 +1,133 @@
+{
+  "id": "A3",
+  "revision": "R2.1 (2026-10-22): physics-driven layout revision",
+  "embodiment": "Dual ARX X5, stationary island mount (common rig: bases side by side at x=0.00 / 0.60 m, y=-0.255 m, 0.60 m apart, facing +y; RoboDojo head camera 0.04 m forward of the base midpoint, 0.543 m above the mount tops, 60 deg down, Gemini 345Lg 640x480; D435 wrist cameras on link6); ready pose q=[0, .94, 1.34, -1.40, 0, 0]",
+  "time_origin": "t=0 at the first agent observation; process and physics continue during agent deliberation",
+  "interface": "Agent/LLM action and observation interface intentionally undefined in this revision; see README",
+  "status": "design + static initial state + task/process/scoring model + Isaac Sim physics episode with a privileged oracle controller (sim.py), validated against the task model and an independent trajectory check, and recorded (one reference episode, seed 0)",
+  "title": "Flip one pancake at the right moment",
+  "category": "A temporal window",
+  "household_need": "A pancake must be turned when the underside is golden; the classic cue is bubbles popping on top.",
+  "instruction": "A pancake is cooking in the frying pan. Flip it with the turner when its underside is golden, and leave it cooking in the pan. The underside turns from pale to golden to dark as it cooks; it cannot be seen from above, only where the pancake's edge is lifted. The flip counts once the pancake lies turned over, wholly inside the pan and at rest, with the turner off it and out of the pan: the blade's tip 3 cm outside the rim, or 12 cm above the pan's floor.",
+  "core_interventions": [
+    "grasp the offset turner by its handle",
+    "slide the blade under the pancake, lever it up on one edge, push it over so it lands turned in the pan, withdraw the turner"
+  ],
+  "process": {
+    "state": "bottom browning d, top bubble state p",
+    "model": "d(t) = 1 - exp(-(t0 + t)/tau) while in pan contact; paused while lifted. p = clamp((t0 + t - 0.4 tau)/(0.9 tau), 0, 1) drives bubble density/popped ratio and edge set texture",
+    "hidden": {
+      "tau_s": "U[50, 80]",
+      "t0_s": "U[15, 25] (age at t=0)"
+    },
+    "nominal": {
+      "tau_s": 65,
+      "t0_s": 20,
+      "target_band": [
+        0.55,
+        0.75
+      ],
+      "equivalent_window_s": "flip between t ~32 s and ~70 s",
+      "real_time_scale": "compressed: the first side has cooked 52-90 s at the flip (medium; 69-120 s easy, 35-60 s hard), about 2x shorter than the 2-3 min of pancake recipes (Betty Crocker; Cook's Illustrated), 1.5-1.7x at easy and 3-3.5x at hard; the cue (bubbles breaking, edges set) is the recipes' own"
+    },
+    "cue": "top-surface bubbles (forming -> popping -> set edges); bottom is not visible unless the agent lifts an edge (allowed, costs time)"
+  },
+  "timing": {
+    "event": "flip time = pancake leaves pan contact on the lift that turns it",
+    "rule": "quality 1 inside band, 0 below 0.35 / above 0.90",
+    "early": "pale/raw bottom",
+    "late": "dark bottom"
+  },
+  "completion": {
+    "physical": [
+      "pancake rotated > 150 deg about a horizontal axis",
+      "pancake fully inside pan, released, settled 1 s",
+      "turner withdrawn from pan area"
+    ],
+    "temporal": "first-side browning in band"
+  },
+  "failures": [
+    "pancake falls out of pan",
+    "folded/partial flip (< 150 deg)",
+    "turner dropped into pan"
+  ],
+  "permitted": [
+    "peeking under an edge with the turner",
+    "holding the pan handle with the other arm"
+  ],
+  "prohibited": [
+    "removing the pan from the burner"
+  ],
+  "arm_roles": "left: offset turner (slide under, lever about the side edge, topple, withdraw); right: idle (parked)",
+  "demo_guidance": [
+    "X5 joint6 range is +-90 deg: plan the flip with combined wrist joints or a slide-and-turn motion.",
+    "Gas ring and center knob are visual; heat is fixed medium."
+  ],
+  "open_items": [
+    "turner blade thickness vs pancake edge contact",
+    "pancake as rigid disc (no deformation)"
+  ],
+  "assets": [
+    {
+      "name": "Cooktop",
+      "role": "fixture: 5-burner gas cooktop",
+      "source": "src/roboclock/envs/household/assets/x5/lightwheel_kitchen/Collected_KitchenRoom/Stovetop012/Stovetop012.usd",
+      "size_m": [
+        0.8373,
+        0.5528,
+        0.0453
+      ]
+    },
+    {
+      "name": "FryingPan",
+      "role": "non-stick frying pan on the center burner, handle toward +x",
+      "source": "src/roboclock/envs/household/assets/x5/objects/pan_2/pan_2.usdc",
+      "size_m": [
+        0.44,
+        0.2929,
+        0.0521
+      ]
+    },
+    {
+      "name": "Pancake",
+      "role": "pancake proxy (12.4 cm x 8 mm rigid disc, textured top)",
+      "source": "authored in a3_x5/scene.py (disclosed proxy)",
+      "size_m": [
+        0.124,
+        0.124,
+        0.008
+      ]
+    },
+    {
+      "name": "Spatula",
+      "role": "ordinary turner, bent 30 deg at the neck into an offset turner (points override in a3_x5/scene.py), blade flat on the counter in front of the pan, handle rising toward the left arm",
+      "source": "src/roboclock/envs/household/assets/x5/objects/spatula_0/spatula_0.usdc",
+      "size_m": [
+        0.3,
+        0.0778,
+        0.0912
+      ]
+    }
+  ],
+  "files": {
+    "task_model": "src/roboclock/envs/household/a3_x5/task.py",
+    "scene_builder": "src/roboclock/envs/household/a3_x5/scene.py",
+    "initial_state": "data/household/x5_initial/A3/",
+    "simulation": "src/roboclock/envs/household/a3_x5/sim.py",
+    "demo": "data/household/x5_demos/A3/"
+  },
+  "layout_revision": {
+    "why": [
+      "The native turner is flat: lying on the counter its handle is level with the blade, so the X5 palm (7.8-14.5 cm behind the tool point, +-9 cm along the jaw axis) met the counter at the grasp and the pan rim while the blade slid under the pancake.",
+      "A two-pad X5 pinch cannot toss or roll a rigid pancake reliably: fast wrist rolls threw it chaotically and levering about its far edge threw it out of the pan. Levering about the side edge parallel to the blade to ~85 deg and then pushing the pancake over is deterministic.",
+      "That lever (blade along a 50 deg line, rolled to 85 deg) is reachable only for the left arm; beyond ~88 deg it is infeasible.",
+      "On the 0.44-scale pan the flat floor was too small for a 12.4 cm pancake to be turned over inside the rim."
+    ],
+    "changes": [
+      "pan scaled to 0.55 (rim radius 0.18 m); the pancake is poured off-centre by (0.041, -0.034) m (5.3 cm against the turn; 4.5 cm landed it on the wall slope, 2026-11-04) so it lands as far from the wall as it started",
+      "turner bent 30 deg at the neck into an offset turner lying blade-flat at neck (0.47, -0.14), turned 10 deg toward the left arm (was (0.354, -0.25) along +x before the 0.60 m rig; the cooktop footprint is 64 % since then), handle toward the left arm; grasp 0.12-0.14 m along the handle with the tool pitched 20 deg down",
+      "left arm takes the turner; the right arm stays parked"
+    ],
+    "unchanged": "instruction, process model (browning tau 65 s, t0 20 s nominal), flip event (rotation >= 150 deg), band [0.55, 0.75] and scoring"
+  }
+}

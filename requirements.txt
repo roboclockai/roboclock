@@ -1,0 +1,5 @@
+# Isaac Sim runtime: Python 3.11, Linux GLIBC >=2.35, NVIDIA RTX GPU.
+# Isaac Sim 6.0.1 (.[sim6]) and 6.2.0 (.[sim62], sports / chess) use Python 3.12.
+# Dependency versions and optional groups are defined in pyproject.toml.
+--extra-index-url https://pypi.nvidia.com
+-e .[sim]

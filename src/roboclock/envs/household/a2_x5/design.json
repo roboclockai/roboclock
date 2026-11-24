@@ -1,0 +1,108 @@
+{
+  "id": "A2",
+  "revision": "R3.1 (2026-11-03): countertop ice dispenser, half a glass (R3: refrigerator door dispenser, exactly 5 cubes); 2026-11-16: described as a refrigerator-door style dispenser that meters ice in batches (text only; scene, timing and scoring unchanged); 2026-11-17: cadence slowed so the release window is >= 1.0 s at every tier (interval U[1.4, 1.7] s, nominal 1.5 s, jitter +-5 %, hard cube cadence x1.15)",
+  "embodiment": "Dual ARX X5, stationary island mount (common rig: bases side by side at x=0.00 / 0.60 m, y=-0.255 m, 0.60 m apart, facing +y; RoboDojo head camera 0.04 m forward of the base midpoint, 0.543 m above the mount tops, 60 deg down, Gemini 345Lg 640x480; D435 wrist cameras on link6); ready pose q=[0, .94, 1.34, -1.40, 0, 0]",
+  "time_origin": "t=0 at the first agent observation; process and physics continue during agent deliberation",
+  "interface": "Agent/LLM action and observation interface intentionally undefined in this revision; see README",
+  "status": "design + static initial state + task/process/scoring model + Isaac Sim physics episode with a privileged oracle controller (sim.py), validated against the task model and an independent trajectory check, and recorded",
+  "title": "Fill a glass about half full of ice at the refrigerator-door style ice dispenser",
+  "category": "A temporal window",
+  "household_need": "A refrigerator-door style ice dispenser meters ice out in batches while its paddle is held in, about one batch every 1.5 s (here one cube per batch). Whoever holds the glass lets go of the paddle when the ice reaches the wanted level: too early leaves too little ice, too late gives too much.",
+  "instruction": "Fill the glass about half full at the refrigerator-door style ice dispenser: 40 to 60 % of its inner height, at the top of the highest cube. Take the glass off the counter, hold it under the outlet and push the paddle in with its rim. Ice is metered out in batches of one cube while the paddle is held in, during the first press only: pull the glass back when there is enough, then set it down upright on the counter and let go. Every cube must end up in the glass, which must never tilt more than 45 degrees.",
+  "core_interventions": [
+    "right arm: pinch the glass on the counter from behind (jaws across it), lift it and carry it to the dispenser recess",
+    "right arm: hold the glass mouth under the ice outlet and push the dispenser paddle back with the glass rim (switch at 5 deg; the oracle holds about 8 deg)",
+    "dispenser: after a spin-up delay one cube drops every interval while the paddle is held in",
+    "right arm: pull the glass back (paddle released) when the ice reaches about half the glass; carry the glass out and set it down on the counter; let go, rise and park"
+  ],
+  "process": {
+    "state": "cubes delivered into the chute (integer); ice level in the glass (measured)",
+    "model": "while the paddle is held in, the auger runs: cube k is delivered when the run time reaches spin_up + sum of k-1 intervals, interval_k = interval x (1 + jitter_k); after the release it coasts 0.12 s (a cube due in that time still drops). One press: dispensing ends at the first release.",
+    "hidden": {
+      "spin_up_s": "U[0.6, 1.3]",
+      "interval_s": "U[1.4, 1.7]",
+      "jitter": "per cube U[-0.05, 0.05] (seeded; none at seed 0)"
+    },
+    "nominal": {
+      "spin_up_s": 0.9,
+      "interval_s": 1.5,
+      "coast_s": 0.12,
+      "level_band": [
+        0.4,
+        0.6
+      ]
+    },
+    "difficulty": "process rate x0.75 / x1 / x1.5 (easy / medium / hard) for the spin-up and coast; the cube cadence runs x0.75 / x1 / x1.15 (one cube every 2.0 / 1.5 / 1.3 s nominal): capped at hard so the release window stays >= 1.0 s. Each cube raises the ice by about 0.06-0.17 of the glass, so the band holds one to three cube counts (measured, seeds 0-9 with the paddle held); with a single count the release must fall after that cube and >= coast before the next: one interval minus the coast, >= 1.61 / 1.21 / 1.08 s worst case (2026-11-17; was 1.13 / 0.85 / 0.56 s with interval U[1.1, 1.6] s, +-12 % jitter and x1.5 at hard, and hard seed 2 measured 0.94 s)"
+  },
+  "timing": {
+    "event": "release = paddle back under 3 deg after the press (measured paddle angle)",
+    "rule": "ice level (top of the highest resting cube over the glass inner height) at the end in [0.40, 0.60]; quality linear to 0 at 0.20 / 0.80",
+    "early": "too little ice (below 40 % of the glass)",
+    "late": "too much ice (above 60 % of the glass)"
+  },
+  "completion": {
+    "physical": [
+      "paddle pressed (>= 5 deg for >= 0.25 s) and released",
+      "glass set down upright on the counter and released, every cube at rest, for >= 1 s",
+      "no cube outside the glass, glass not dropped or tilted > 45 deg"
+    ],
+    "temporal": "ice level in the glass in [0.40, 0.60] at the end"
+  },
+  "failures": [
+    "glass dropped or tipped > 45 deg",
+    "a dispensed cube comes to rest outside the glass (missed the mouth, bounced out, spilled)"
+  ],
+  "permitted": [
+    "either arm, or both, for the glass",
+    "pressing the paddle with any part of the glass rim or with the gripper (cubes must still land in the glass)",
+    "watching the ice level through the glass"
+  ],
+  "prohibited": [
+    "a second press: dispensing ends at the first release (a re-press delivers nothing)",
+    "tipping ice out to correct the level"
+  ],
+  "arm_roles": "right: glass (pick, hold at the dispenser, place); left: idle",
+  "demo_guidance": [
+    "Physics overlay and oracle: src/roboclock/envs/household/a2_x5/sim.py; runner scripts/household/run_x5_episode.py; independent check scripts/household/validate_x5_episode.py.",
+    "Paddle: native Refrigerator001_Switch at x0.85 on a revolute hinge about x at its top pivot, 0-12 deg, return spring 0.03 N m/deg preloaded 2 deg.",
+    "Glass: free hollow compound (base disc, 24 wall boxes), 200 g, 56 mm across: inside the 60.3 mm X5 jaw opening.",
+    "Cubes: 8.5 g rigid crescents, ice friction 0.15/0.10, CCD. The dispenser places the next waiting cube just inside the outlet, moving down at 0.3 m/s; from there it falls freely.",
+    "Recess 26 cm wide: the X5 palm (+-9 cm along the jaw axis) holding the glass hit the walls of a 20 cm recess.",
+    "Oracle: tool azimuth 125 deg, 20 deg down, pads 3.5 cm above the glass base (wrist off the head camera line of sight to the glass mouth); pulls back when the resting ice reaches 0.46 of the glass."
+  ],
+  "open_items": [
+    "the dispenser body is an authored proxy; only its paddle (and the paddle material) comes from a native asset, the Lightwheel Refrigerator001 door dispenser; the paddle reads \"Ice | Water\" and the head camera sees its \"Water\" half",
+    "cube delivery into the outlet is an appliance mechanism (pose write of the next waiting cube); the fall, landing and level are physical",
+    "cadence: one cube every 2.0 / 1.5 / 1.3 s nominal (easy / medium / hard) against one batch per 1.5 s in a refrigerator-door dispenser (Whirlpool, US patent 4,942,979: a 20 rpm drum delivers a batch per half revolution); medium matches it, easy is 1.33x slower and hard 1.15x faster. The mass rate (8.5 g per batch, 4.3 / 5.7 / 6.5 g/s) has no source: the patent does not give the pieces per batch. Spin-up and coast are modelling choices, not measured appliance data",
+    "the dispenser stands on the counter as its own unit (authored body, R3.1); refrigerator-door style refers to its paddle, recess and metering, not to a refrigerator in the scene",
+    "the ice level is the top of the highest resting cube: a loose pile can settle by about 0.05-0.09 after the glass is moved"
+  ],
+  "assets": [
+    {
+      "name": "IceMachine",
+      "role": "countertop ice dispenser: body with ice bin, dispensing recess, drip tray, nozzle housing, octagonal outlet",
+      "source": "authored in a2_x5/scene.py (disclosed proxy)"
+    },
+    {
+      "name": "IcePaddle",
+      "role": "dispenser paddle: native Refrigerator001_Switch x0.85 on its top hinge, native material",
+      "source": "src/roboclock/envs/household/assets/x5/lightwheel_kitchen/Collected_KitchenRoom/Refrigerator001/Refrigerator001.usd"
+    },
+    {
+      "name": "Glass",
+      "role": "tumbler 56 x 120 mm, lathe proxy, OmniGlass",
+      "source": "authored in a2_x5/scene.py (disclosed proxy)"
+    },
+    {
+      "name": "Ice",
+      "role": "16 crescent cubes 30 x 28 x 14 mm in the hidden bin, opaque frosty material",
+      "source": "authored in a2_x5/scene.py (disclosed proxy)"
+    }
+  ],
+  "files": {
+    "task_model": "src/roboclock/envs/household/a2_x5/task.py",
+    "scene_builder": "src/roboclock/envs/household/a2_x5/scene.py",
+    "simulation": "src/roboclock/envs/household/a2_x5/sim.py",
+    "superseded_task": "src/roboclock/envs/household/a2_oven_x5/ (countertop-oven cheese toast, kept for reference)"
+  }
+}

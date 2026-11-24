@@ -1,0 +1,45 @@
+{
+  "task_id": 43,
+  "seed": 0,
+  "embodiment": "dual_arx_x5",
+  "source_xy_offset_m": [
+    0.0,
+    0.0
+  ],
+  "source_yaw_deg": 0.0,
+  "dispense_onset_s": 18.0,
+  "window_relative_s": [
+    2.0,
+    14.0
+  ],
+  "dispense_speed_m_s": 0.04,
+  "lid_mass_scale": 1.0,
+  "randomization": {
+    "layout": false,
+    "timing": false,
+    "physical": false
+  },
+  "bounds": {
+    "source_xy_offset_m": [
+      -0.004,
+      0.004
+    ],
+    "source_yaw_deg": [
+      -5,
+      5
+    ],
+    "dispense_onset_s": [
+      16,
+      20
+    ],
+    "lid_mass_scale": [
+      0.9,
+      1.1
+    ]
+  },
+  "independence": "Separate SeedSequence child streams for layout, process timing and physical properties",
+  "scoring": "First released/contact-supported aligned seating, confirmed for0.50s, must begin2–14s after measured bead completion; earlier assembly contact invalidates timing",
+  "assumptions": "Original matched CAD geometry with declared aluminium mass/friction; fixed visible housing clamp and removable lid handling stud; no chemical adhesion or product/robot attachments",
+  "controller": "Privileged native-state joint-drive oracle; not a trained policy",
+  "sha256": "ebef0e550aef84f416e3a0ecb75c526438f94fc5b431ed6b9c8b8f1b9f6e6294"
+}

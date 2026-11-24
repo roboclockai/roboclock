@@ -1,0 +1,89 @@
+{
+  "id": "ALARM",
+  "revision": "R1 (2026-11-22): new task",
+  "embodiment": "Dual ARX X5, stationary island mount (common rig: bases side by side at x=0.00 / 0.60 m, y=-0.255 m, 0.60 m apart, facing +y; RoboDojo head camera 0.04 m forward of the base midpoint, 0.543 m above the mount tops, 60 deg down, Gemini 345Lg 640x480; D435 wrist cameras on link6); ready pose q=[0, .94, 1.34, -1.40, 0, 0]",
+  "time_origin": "t=0 at the first agent observation; process and physics continue during agent deliberation",
+  "interface": "Agent/LLM action and observation interface intentionally undefined in this revision; see README",
+  "status": "design + initial scene + task/process/scoring model + Isaac Sim physics episode with a privileged oracle controller (sim.py); oracle 30/30 through roboclock eval (seeds 0-9 at easy, medium and hard, 2026-11-22)",
+  "title": "Silence the ringing alarm clock",
+  "category": "B event-reactive",
+  "household_need": "Notice that the alarm clock has gone off and switch it off for good with one press on its top.",
+  "instruction": "The alarm clock on the counter will start ringing at an unpredictable time: its bells and hammer shake and the whole clock rattles. Wait until it rings, then silence it within 4.6 seconds: press the red button on top of its handle straight down, from above, about 5 mm, until it stays down. Then let go: it counts once nothing touches the button for 1 second. Do not touch the button before the alarm rings, and do not knock the clock over or push it more than 5 cm.",
+  "core_interventions": [
+    "press the stop button on top of the clock straight down past its catch, then let go"
+  ],
+  "process": {
+    "state": "alarm ringing or not; stop button latched or not",
+    "model": "the alarm starts at ring_time and rings until the measured button travel reaches the catch (4 of 6 mm); the catch then holds the button down and the alarm stays off",
+    "hidden": {
+      "ring_time": "U[2, 8] s; nominal 5 s (seed 0)"
+    },
+    "nominal": {
+      "ring_time": 5.0,
+      "travel_mm": 6.0,
+      "catch_mm": 4.0,
+      "release_dwell": 1.0
+    },
+    "cue": "visual only (the policy has no audio): while it rings the hammer swings between the bells, the bells shiver and the clock twists +-5 deg about its vertical axis and hops 2 mm, changing every 0.04 s; all still again once silenced, and the red button stays down. The second hand ticks throughout."
+  },
+  "timing": {
+    "event": "silenced = button travel >= 4 mm after the alarm started",
+    "rule": "loss = seconds of ringing; limit 15 / 4.6 / 1.4 s (easy / medium / hard)",
+    "calibration": "hard = max(t / 0.8, t + 0.3 s, 1 s) with t = 1.10 s, the reference oracle's slowest silencing from the ready pose over seeds 0-9; medium = sqrt(easy x hard); easy 15 s is a design choice (no source found for how long a wind-up alarm is left ringing)"
+  },
+  "completion": {
+    "physical": [
+      "button pressed past its catch by robot contact after the alarm started",
+      "button untouched for 1 s",
+      "clock upright (tilt <= 30 deg) and within 5 cm of its place"
+    ],
+    "temporal": "seconds of ringing within the tier limit"
+  },
+  "failures": [
+    "button touched or pressed before the alarm rings",
+    "clock tilted more than 30 deg",
+    "clock moved more than 5 cm"
+  ],
+  "permitted": [
+    "either arm",
+    "any part of the gripper",
+    "a late silencing still completes the task physically (timing fails)"
+  ],
+  "prohibited": [
+    "pre-event action"
+  ],
+  "arm_roles": "right: button (single arm); the clock stands between the arms, so the left arm reaches it too",
+  "demo_guidance": [
+    "The clock is a 0.35 kg free-standing rigid body (cylinder and box colliders); the button is a 5 g body on a sprung prismatic joint in the handle (300 N/m, 1.8 N at the stop), held down by a 3 N catch force once the alarm is off.",
+    "The oracle waits at the ready pose with closed jaws, moves the fingertips 3 cm above the button with the tool pitched 60 deg down (a straight-down tool does not reach this height), presses down at 6 cm/s until the travel reaches the stop, lifts off and returns.",
+    "Per seed the clock is shifted +-4 cm in x, +-3 cm in y and turned +-15 deg; the button is on its vertical axis."
+  ],
+  "open_items": [
+    "the ringing is shown by motion of the rendered meshes only; the colliders stay still, and there is no sound",
+    "the stop button is authored: the Poly Haven model has none (top silencer buttons exist on some wind-up alarm clocks, e.g. a 1940 Westclox, collectorsweekly.com/stories/117)",
+    "easy limit unsourced"
+  ],
+  "assets": [
+    {
+      "name": "AlarmClock",
+      "role": "twin-bell wind-up alarm clock, free-standing",
+      "source": "src/roboclock/envs/household/assets/x5/objects/alarm_clock_0/alarm_clock.usda: \"Alarm Clock 01\" (Poly Haven, CC0, polyhaven.com/a/alarm_clock_01), native size",
+      "size_m": [
+        0.1316,
+        0.0667,
+        0.1741
+      ]
+    },
+    {
+      "name": "AlarmButton",
+      "role": "stop button: red cap (22 mm) on a stem in a brass collar on the handle, 6 mm travel, latches down",
+      "source": "authored in alarm_x5/scene.py (disclosed proxy)"
+    }
+  ],
+  "files": {
+    "task_model": "src/roboclock/envs/household/alarm_x5/task.py",
+    "scene_builder": "src/roboclock/envs/household/alarm_x5/scene.py",
+    "simulation": "src/roboclock/envs/household/alarm_x5/sim.py",
+    "demo": "data/household/B4/"
+  }
+}

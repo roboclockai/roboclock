@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RoboClock Teleop</title>
+<style>
+  :root { --bg:#111; --panel:#1c1c1c; --fg:#ddd; --dim:#888; --accent:#4ea1ff; --warn:#ffb340; --ok:#5fd16b; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.4 system-ui, sans-serif; }
+  main { display:grid; grid-template-columns: minmax(0,3fr) minmax(220px,1fr); gap:12px; padding:12px; }
+  .cams { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+  .cam { background:#000; position:relative; border-radius:4px; overflow:hidden; }
+  .cam.head { grid-column: 1 / span 2; }
+  .cam img { width:100%; display:block; image-rendering:auto; }
+  .cam span { position:absolute; left:6px; top:4px; font-size:12px; color:#fff; text-shadow:0 0 3px #000; }
+  aside { background:var(--panel); border-radius:4px; padding:12px; }
+  h1 { font-size:16px; margin:0 0 8px; }
+  .state { font-size:20px; font-weight:600; margin:6px 0; }
+  .state.running { color:var(--ok); } .state.frozen, .state.waiting { color:var(--warn); }
+  .instr { background:#000; padding:8px; border-radius:4px; margin:8px 0; white-space:pre-wrap; }
+  table { border-collapse:collapse; width:100%; }
+  td { padding:2px 4px; vertical-align:top; } td:first-child { color:var(--dim); white-space:nowrap; }
+  kbd { background:#333; border-radius:3px; padding:0 4px; font-family:ui-monospace, monospace; }
+  .held { color:var(--accent); font-family:ui-monospace, monospace; min-height:1.4em; }
+  #focus { color:var(--warn); }
+  .buttons { display:flex; gap:8px; margin:8px 0; flex-wrap:wrap; }
+  button { font:inherit; padding:6px 12px; border-radius:4px; border:1px solid #555; background:#2a2a2a; color:var(--fg); cursor:pointer; }
+  button:hover { background:#383838; } button.primary { border-color:var(--accent); color:var(--accent); }
+  button[hidden] { display:none; }
+  .state.finished { color:var(--accent); }
+  @media (max-width: 800px) { main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <section class="cams" id="cams">
+    <div class="cam head"><span>head</span><img id="cam-head" alt=""></div>
+  </section>
+  <aside>
+    <h1>RoboClock teleop</h1>
+    <div id="conn">connecting…</div>
+    <div class="state" id="state">–</div>
+    <table>
+      <tr><td>episode</td><td id="episode">–</td></tr>
+      <tr><td>sim time</td><td id="time">–</td></tr>
+      <tr><td>speed</td><td id="speed">–</td></tr>
+      <tr><td>achieved</td><td id="achieved">–</td></tr>
+      <tr><td>arm</td><td id="arm">–</td></tr>
+      <tr><td>grippers</td><td id="gripper">–</td></tr>
+      <tr><td>last result</td><td id="result">–</td></tr>
+    </table>
+    <div class="buttons">
+      <button id="restart">Restart episode</button>
+      <button id="again" class="primary" hidden>Restart (same seed)</button>
+      <button id="continue" class="primary" hidden>Continue</button>
+    </div>
+    <div class="instr" id="instruction"></div>
+    <div class="held" id="held"></div>
+    <div id="focus"></div>
+    <table>
+      <tr><td><kbd>Enter</kbd></td><td>start / resume</td></tr>
+      <tr><td><kbd>P</kbd></td><td>freeze / unfreeze (no sim time passes)</td></tr>
+      <tr><td><kbd>.</kbd></td><td>while frozen: advance 0.1 s</td></tr>
+      <tr><td><kbd>[</kbd> <kbd>]</kbd></td><td>slower / faster (0.1×–1×)</td></tr>
+      <tr><td><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></td><td>left / right / both arms</td></tr>
+      <tr><td><kbd>W</kbd><kbd>S</kbd></td><td>forward / back</td></tr>
+      <tr><td><kbd>A</kbd><kbd>D</kbd></td><td>left / right</td></tr>
+      <tr><td><kbd>R</kbd><kbd>F</kbd></td><td>up / down</td></tr>
+      <tr><td><kbd>Q</kbd><kbd>E</kbd></td><td>yaw</td></tr>
+      <tr><td><kbd>I</kbd><kbd>K</kbd></td><td>pitch</td></tr>
+      <tr><td><kbd>J</kbd><kbd>L</kbd></td><td>roll</td></tr>
+      <tr><td><kbd>Shift</kbd></td><td>fine motion (hold)</td></tr>
+      <tr><td><kbd>Space</kbd></td><td>open / close gripper</td></tr>
+      <tr><td><kbd>H</kbd></td><td>return arm to start pose</td></tr>
+      <tr><td><kbd>Backspace</kbd></td><td>restart the episode (asks first)</td></tr>
+    </table>
+  </aside>
+</main>
+<script>
+(() => {
+  const MOTION = new Set(["KeyW","KeyS","KeyA","KeyD","KeyR","KeyF","KeyQ","KeyE",
+                          "KeyI","KeyK","KeyJ","KeyL","ShiftLeft","ShiftRight"]);
+  const COMMANDS = {
+    Enter: {command:"start"}, NumpadEnter: {command:"start"},
+    KeyP: {command:"freeze"}, Period: {command:"step"},
+    BracketLeft: {command:"speed", value:"down"}, BracketRight: {command:"speed", value:"up"},
+    Digit1: {command:"arm", value:"left"}, Digit2: {command:"arm", value:"right"},
+    Digit3: {command:"arm", value:"both"},
+    Space: {command:"gripper"}, KeyH: {command:"home"},
+  };
+  const held = new Set();
+  const $ = id => document.getElementById(id);
+  let socket = null;
+
+  // Relative to the page, so the server works behind a path prefix such as /proxy/<port>/.
+  function socketUrl() {
+    let base = location.href.replace(/[?#].*$/, "").replace(/index\.html$/, "");
+    if (!base.endsWith("/")) base += "/";
+    return base.replace(/^http/, "ws") + "ws";
+  }
+
+  function send(obj) { if (socket && socket.readyState === 1) socket.send(JSON.stringify(obj)); }
+  function sendKeys() { send({keys: [...held]}); $("held").textContent = [...held].join(" "); }
+
+  function camera(name) {
+    let img = $("cam-" + name);
+    if (!img) {
+      const box = document.createElement("div");
+      box.className = "cam";
+      box.innerHTML = `<span>${name}</span><img id="cam-${name}" alt="">`;
+      $("cams").appendChild(box);
+      img = $("cam-" + name);
+    }
+    return img;
+  }
+
+  function connect() {
+    socket = new WebSocket(socketUrl());
+    socket.binaryType = "arraybuffer";
+    socket.onopen = () => { $("conn").textContent = "connected"; sendKeys(); };
+    socket.onclose = () => { $("conn").textContent = "disconnected, retrying…"; setTimeout(connect, 1000); };
+    socket.onmessage = event => {
+      if (typeof event.data === "string") return status(JSON.parse(event.data));
+      const bytes = new Uint8Array(event.data);
+      const name = new TextDecoder().decode(bytes.subarray(1, 1 + bytes[0]));
+      const img = camera(name);
+      const url = URL.createObjectURL(new Blob([bytes.subarray(1 + bytes[0])], {type: "image/jpeg"}));
+      const old = img.src;
+      img.onload = () => { if (old.startsWith("blob:")) URL.revokeObjectURL(old); };
+      img.src = url;
+    };
+  }
+
+  function status(s) {
+    if (s.state !== undefined) { $("state").textContent = s.state; $("state").className = "state " + s.state; }
+    if (s.episode !== undefined) $("episode").textContent = s.episode;
+    if (s.sim_time !== undefined) $("time").textContent = Number(s.sim_time).toFixed(2) + " s";
+    if (s.speed !== undefined) $("speed").textContent = s.speed + "×";
+    $("achieved").textContent = s.achieved == null ? "–" : s.achieved.toFixed(2) + "×";
+    if (s.selected !== undefined) $("arm").textContent = s.selected;
+    if (s.gripper) $("gripper").textContent = `L ${s.gripper.left}, R ${s.gripper.right}`;
+    if (s.instruction !== undefined) $("instruction").textContent = s.instruction;
+    if (s.state === "waiting") $("state").textContent = "press Enter to start";
+    if (s.state === "finished") $("state").textContent = "episode over: restart or continue";
+    if (s.state === "restarting") $("state").textContent = "restarting…";
+    if (s.state === "continuing") $("state").textContent = "loading the next episode…";
+    if (s.state !== undefined) {
+      const over = s.state === "finished";
+      $("again").hidden = $("continue").hidden = !over;
+      $("restart").hidden = over;
+    }
+    if (s.result === null) $("result").textContent = "–";
+    if (s.result) {
+      const r = s.result;
+      $("result").textContent = `${r.task_id} ${r.difficulty} seed ${r.seed}: physical ${r.task_success}, ` +
+        `temporal ${r.temporal_success}, joint ${r.joint_success}` +
+        (r.score != null ? `, score ${r.score}` : "") + (r.termination_reason ? ` (${r.termination_reason})` : "");
+    }
+  }
+
+  function restart() {
+    if (confirm("Restart this episode from the beginning? This attempt is discarded.")) send({command: "restart"});
+  }
+  function button(id, action) {
+    $(id).addEventListener("click", e => { e.currentTarget.blur(); action(); });  // keep keys on the page
+  }
+  button("restart", restart);
+  button("again", () => send({command: "restart"}));
+  button("continue", () => send({command: "continue"}));
+
+  addEventListener("keydown", e => {
+    if (e.code === "Backspace" && !e.repeat) { e.preventDefault(); held.clear(); sendKeys(); return restart(); }
+    if (COMMANDS[e.code] || MOTION.has(e.code)) e.preventDefault();
+    if (e.repeat) return;
+    if (COMMANDS[e.code]) send(COMMANDS[e.code]);
+    if (MOTION.has(e.code)) { held.add(e.code); sendKeys(); }
+  });
+  addEventListener("keyup", e => { if (held.delete(e.code)) sendKeys(); });
+  // A lost focus would leave keys held: drop them all (the server also drops stale keys).
+  addEventListener("blur", () => { held.clear(); sendKeys(); $("focus").textContent = "click here to give the page keyboard focus"; });
+  addEventListener("focus", () => { $("focus").textContent = ""; });
+  setInterval(sendKeys, 100);  // heartbeat: the server stops the arms 0.3 s after the last one
+  connect();
+})();
+</script>
+</body>
+</html>

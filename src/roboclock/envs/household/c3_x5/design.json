@@ -1,0 +1,100 @@
+{
+  "id": "C3",
+  "embodiment": "Dual ARX X5, stationary island mount (common rig: bases side by side at x=0.00 / 0.60 m, y=-0.255 m, 0.60 m apart, facing +y; RoboDojo head camera 0.04 m forward of the base midpoint, 0.543 m above the mount tops, 60 deg down, Gemini 345Lg 640x480; D435 wrist cameras on link6); ready pose q=[0, .94, 1.34, -1.40, 0, 0]",
+  "time_origin": "t=0 at the first agent observation; process and physics continue during agent deliberation",
+  "interface": "docs/household/x5-task-interface.md (16 joint-position targets, RGB observation, instruction)",
+  "revision": "R3 (2026-11-02): cutlery organization; replaces 'clear two place settings, then wipe each mat'",
+  "status": "design + initial scene + task/scoring model + Isaac Sim physics episode with a privileged oracle, validated from the trajectory, recorded",
+  "title": "Cutlery organization: sort the utensils into the drawer",
+  "category": "C qualified throughput (all items as quickly as possible)",
+  "household_need": "Clean cutlery from the table has to go back into the drawer, each kind in its own compartment, and the time to do it is limited.",
+  "instruction": "Spoons, forks and knives are mixed on the table. Put each one into its compartment of the open drawer (each compartment already holds one of its kind). A utensil counts while it lies at rest, released, inside the compartment of its kind and below the tops of its walls: lying across a wall does not count. At the end none may be in a wrong compartment or off the counter, and the three utensils already in the drawer must stay in their compartments. Sort all of them as quickly as possible.",
+  "core_interventions": [
+    "tell spoon, fork and knife apart by their heads",
+    "match each kind to its compartment by the utensil already in it",
+    "pinch a flat handle off the table, turn it along the compartment, lay it in",
+    "share the drawer between the two arms"
+  ],
+  "process": {
+    "state": "rigid-body poses only (no symbolic process)",
+    "model": "six loose utensils (two spoons, two forks, two knives) on the counter; an open three-compartment drawer with one reference utensil per compartment (nine loose utensils until 2026-11-09)",
+    "hidden": {
+      "layout": "per seed: which utensil lies in which of six table slots (+-0.6 cm across, +-1 cm along, +-8 deg) and the compartment order (one of six)"
+    },
+    "nominal": {
+      "seed_0": "compartments spoons / forks / knives from left to right; three utensils left of the drawer, three right"
+    },
+    "cue": "the heads of the utensils and the reference utensil in each compartment (agent camera)"
+  },
+  "timing": {
+    "event": "a utensil counts as sorted while it rests (< 5 cm/s), released, inside the compartment of its kind, below the wall tops",
+    "rule": "C-class batch task (score_version 2, docs/c-class-timing.md): the six loose utensils are the jobs; t_Q is the first time all six are sorted at once. One run per seed to H = 5 t_o (t_o = 25.56 s, measured on the six-utensil scene: 127.8 s at every difficulty), scored at every tier, T = 4 / 2 / 1 t_o; the difficulty changes nothing in the episode. Ends early 2 s after all six are sorted, or on a stall (from T_medium, no new utensil sorted for max(0.5 t_o, 1.5 T_easy / 6) = 1.0 t_o). Until 2026-11-09: 45 s / time_scale, quota 6 of 9"
+  },
+  "completion": {
+    "physical": [
+      "all six loose utensils sorted at the end",
+      "no utensil in a wrong compartment at the end",
+      "no utensil off the counter",
+      "reference utensils stay in their compartments"
+    ],
+    "temporal": "t_Q within the tier budget T = m x t_o (no physical terms)"
+  },
+  "metrics": [
+    "correct",
+    "wrong",
+    "organized_score = correct - wrong",
+    "utensils_per_minute",
+    "first_sorted_times"
+  ],
+  "failures": [
+    "utensil dropped off the counter",
+    "reference utensil moved out of its compartment",
+    "utensil left in a wrong compartment"
+  ],
+  "permitted": [
+    "stacking utensils in a compartment",
+    "either arm using any compartment",
+    "laying a utensil either way round"
+  ],
+  "prohibited": [
+    "moving the drawer"
+  ],
+  "arm_roles": "oracle: each arm sorts the utensils on its side of the drawer, nearest first; only one arm is over the drawer at a time",
+  "layout": {
+    "drawer": "static, 27.2 x 26.6 cm outside, centre (0.30, -0.10) m; compartments 8 x 25 cm, walls 4.5 cm, floor 8 mm",
+    "table": "six slots, three per arm, 5.5 cm apart: x 0.015 to 0.125 m (left arm) and 0.475 to 0.585 m (right arm), y -0.01 to 0.01 m (until 2026-11-09 nine: also x -0.04 and 0.64 m and a far slot at (0.04, 0.205) m)",
+    "reach": "top-down pinches at the counter reach about 0.46 m from each base"
+  },
+  "object_sizes": {
+    "handle": "shared: 11 x 1.6 x 0.8 cm, dark, two rivets",
+    "spoon": "19.5 cm, bowl 6 x 4 cm, 40 g",
+    "fork": "19.7 cm, four tines, 40 g",
+    "knife": "22.7 cm, blade 2 cm wide, 45 g"
+  },
+  "history": [
+    "R2.1 (2026-10-25): clear two place settings into a bus tray, then wipe each mat with a sponge before two seatings",
+    "R3 (2026-11-02): replaced on request by cutlery organization"
+  ],
+  "open_items": [
+    "handles are thicker than steel cutlery (8 mm) so the 15 x 10 mm pads can pinch them flat off the counter",
+    "box colliders: the spoon bowl is a solid box, fork tines one plate"
+  ],
+  "assets": [
+    {
+      "name": "Drawer",
+      "role": "open cutlery drawer with three compartments",
+      "source": "authored in c3_x5/scene.py"
+    },
+    {
+      "name": "Spoon1-3, Fork1-3, Knife1-3",
+      "role": "utensils (3 = reference in the drawer)",
+      "source": "authored in c3_x5/scene.py (meshes)"
+    }
+  ],
+  "files": {
+    "task_model": "src/roboclock/envs/household/c3_x5/task.py",
+    "scene_builder": "src/roboclock/envs/household/c3_x5/scene.py",
+    "simulation": "src/roboclock/envs/household/c3_x5/sim.py",
+    "demo": "data/household/x5_demos/C3/"
+  }
+}

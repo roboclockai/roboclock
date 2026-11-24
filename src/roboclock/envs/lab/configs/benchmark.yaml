@@ -1,0 +1,344 @@
+sim:
+  physics_dt: 0.004  # exactly robodojo_rig.PHYSICS_HZ (250 Hz) in every task
+  control_decimation: 5  # 50 Hz environment step; observations render when a policy reads them
+  # Policy cameras (RoboDojo): `rgb` = rig head camera, `left_wrist_rgb` /
+  # `right_wrist_rgb` = wrist cameras on link6, all 640x480 (roboclock.envs.robodojo_rig).
+  camera_resolution:
+  - 640
+  - 480
+  observation_camera: head
+  # Opt in to the RoboDojo cameras, render-on-read observations and the per-reset rig check (backend.py).
+  robodojo_cameras: true
+  # Third-person overview camera; created only for recordings (sim.overview_camera).
+  overview_resolution:
+  - 1280
+  - 960
+  # true: physics + oracle only. No cameras, no render calls, zero images.
+  no_render: false
+  settle_seconds: 0.5
+  placement_dwell: 0.2
+scene:
+  table_height: 0.75
+  table_center:
+  - 0.45
+  - 0.0
+  - 0.7
+  table_size:
+  - 1.0
+  - 1.1
+  - 0.1
+  camera_position:
+  - 1.5
+  - 1.2
+  - 2.1
+  camera_look_at:
+  - 0.38
+  - -0.02
+  - 1.08
+  liquid_background_bench: closed_laboratory_bench.usdc
+  liquid_background_bench_position: [1.25, -2.0, 0.0]
+  liquid_camera_position: [1.45, 2.3, 2.05]
+  liquid_camera_look_at: [0.25, -0.45, 1.15]
+  liquid_camera_focal_length: 29.0
+  camera_focal_length: 24.0
+  camera_horizontal_aperture: 36.0
+  spatial_jitter: 0.05
+  clutter:
+    enabled: true
+    count: 10
+    seed_offset: 202
+    source_clearance: 0.045
+    target_clearance: 0.045
+    pair_clearance: 0.012
+  mass_range:
+  - 0.035
+  - 0.075
+  friction_range:
+  - 0.6
+  - 1.0
+  light_intensity_range:
+  - 1800
+  - 2600
+visuals:
+  hdr_path: shared://hdr/studio_small_09_2k.hdr
+  hdr_intensity: 180.0
+  hdr_rotation: 35.0
+  key_intensity: 420.0
+  fill_intensity: 90.0
+  labels: true
+  renderer: RaytracedLighting
+  path_tracing_samples: 512
+  path_tracing_spp: 8
+  path_tracing_bounces: 8
+  render_updates: 72
+  materials:
+    worktop:
+      texture_set: epoxy
+      uv_scale:
+      - 1.0
+      - 1.0
+      normal_strength: 0.18
+      roughness_map_weight: 0.5
+    steel:
+      texture_set: brushed_steel
+      uv_scale:
+      - 2.0
+      - 2.0
+      normal_strength: 0.2
+      roughness_map_weight: 0.65
+    aluminum:
+      texture_set: brushed_steel
+      uv_scale:
+      - 3.0
+      - 3.0
+      normal_strength: 0.15
+      roughness_map_weight: 0.45
+    polymer:
+      texture_set: powder_coat
+      uv_scale:
+      - 2.0
+      - 2.0
+      normal_strength: 0.18
+      roughness_map_weight: 0.5
+    wall:
+      texture_set: painted_plaster_wall
+      uv_scale:
+      - 0.5
+      - 0.5
+      normal_strength: 0.15
+      roughness_map_weight: 0.6
+      tint:
+      - 0.84
+      - 0.91
+      - 0.98
+    floor:
+      texture_set: grey_tiles
+      uv_scale:
+      - 0.75
+      - 0.75
+      normal_strength: 0.15
+      roughness_map_weight: 0.7
+physics:
+  contact_offset: 0.001
+  rest_offset: 0.0
+  solver_position_iterations: 16
+  solver_velocity_iterations: 4
+  minimum_grasp_time: 0.04
+  contact_force_threshold: 0.06
+  relative_hold_speed: 0.2
+  recovery_dwell: 0.3
+  catch_dwell: 0.25
+control:
+  max_cartesian_speed: 0.35
+  insertion_speed: 0.07
+  reactive_speed: 0.65
+  # Target lead over the measured joints per control period. The drives lag by
+  # kd/kp = 0.04 s, so the arm settles at speed * (1 - exp(-T/0.04)), about 1.13 rad/s.
+  joint_target_speed: 2.9
+  # Reactive tasks with the shortest (1-2 s) hard deadlines lead the joints harder
+  # (still within the X5's 5 rad/s joint velocity limits) for real margin.
+  task_joint_target_speed: {B2: 5.0, B6: 5.0, B7: 5.0}
+  phase_timeout: 10.0
+  # Oracle perception delay (s) after the fault cue. Without it the arm moved on
+  # the same tick as the fault, so in the videos it moved before the cue showed.
+  # B2's status lens starts to read red in the RTX image ~0.5 s after the fault
+  # and is fully red by ~1 s (robot motion shows at once; emission, Fabric writes
+  # and transform jitter did not change this), so B2 waits 0.6 s; its faster
+  # approach and pull still isolate <= 1.50 s after the fault (hard: 1.88 s). B5's
+  # door swing and beep are immediate.
+  cue_reaction_delay: {B2: 0.6, B5: 0.3}
+  # Safety margin (m) inside the measured X5 reach map (policies/trajectories.py
+  # REACH_TABLE). Goals outside it are never attempted.
+  reach_margin: 0.04
+difficulty:
+  easy:
+    window_width:
+    - 10.0
+    - 12.0
+    reaction_latency:
+    - 3.5
+    - 4.5
+    transfer_deadline:
+    - 12.0
+    - 15.0
+    position_tolerance: 0.025
+    orientation_tolerance: 0.3
+  medium:
+    window_width:
+    - 5.0
+    - 7.0
+    reaction_latency:
+    - 2.0
+    - 3.0
+    transfer_deadline:
+    - 8.0
+    - 10.0
+    position_tolerance: 0.018
+    orientation_tolerance: 0.2
+  hard:
+    window_width:
+    - 2.0
+    - 3.0
+    reaction_latency:
+    - 0.8
+    - 1.5
+    transfer_deadline:
+    - 5.0
+    - 7.0
+    position_tolerance: 0.012
+    orientation_tolerance: 0.12
+episode:
+  window_start_range:
+  - 8.0
+  - 12.0
+  event_time_range:
+  - 4.0
+  - 10.0
+  num_samples_range:
+  - 20
+  - 30
+  required_accuracy: 0.95
+  max_time: 120.0
+
+# C1-C3 are batch C tasks (score_version 2; docs/c-class-timing.md): difficulty changes nothing
+# in their episode. Every difficulty samples this level's values (position / orientation
+# tolerance 0.018 m / 0.2 rad, the former medium values) and runs to the horizon
+# H = 5 t_o(Q) from the frozen oracle time (roboclock.evaluation.throughput), not to
+# episode.max_time. The difficulty only picks the time tier (T = 4 / 2 / 1 t_o) that
+# temporal_success and joint_success report.
+throughput_tasks:
+  episode_level: medium
+
+# B1 measures completed isolation, not merely first grasp. Times are simulation
+# deadlines from the visible alarm; they are not predictions of glass fracture.
+# Tier calibration (2026-11-16): t = slowest scripted-oracle time over seeds 0-9 x
+# easy/medium/hard (zero inference latency, zero control delay) of the compared quantity
+# (reaction_latency; B1 transfer_deadline: placement completion - alarm). The oracle is a
+# reference level, not an optimal time. hard = max(t / 0.8, t + 0.30 s) rounded up to
+# 0.01 s; medium = sqrt(easy * hard) rounded to 0.01 s. Since 2026-11-17 no
+# limit is below 1.0 s at any level (hard >= 1.0 s), which only raises B6/B7.
+# Easy (2026-11-23, user rule): a documented real-world time where one exists, else 4 x t.
+# No lab reactive limit has a documented time, so every easy below is 4 x t (was 4 / 12 / 4 /
+# 4 / 4 / 3 / 2 / 2 s, design values).
+#   t: B1 1.172 (transfer 5.080), B2 1.504, B3 1.592, B4 1.69, B5 1.82, B6/B7 0.324 s.
+# B4/B5 t is from the 2026-11-19 scenes (rig centred on the tube, freezer facing the rig; 1.644 /
+# 1.620 s before); their hard limits follow it since 2026-11-23 (were 2.06 / 2.03 s).
+# B2/B5 t includes the oracle's cue_reaction_delay (0.6 / 0.3 s, control below).
+reactive_tasks:
+  B1:
+    easy: {reaction_latency: [4.69, 4.69], transfer_deadline: [20.32, 20.32]}
+    medium: {reaction_latency: [2.63, 2.63], transfer_deadline: [11.36, 11.36]}
+    hard: {reaction_latency: [1.48, 1.48], transfer_deadline: [6.35, 6.35]}
+  B2:
+    easy: {reaction_latency: [6.02, 6.02]}
+    medium: {reaction_latency: [3.36, 3.36]}
+    hard: {reaction_latency: [1.88, 1.88]}
+  B3:
+    easy: {reaction_latency: [6.37, 6.37]}
+    medium: {reaction_latency: [3.56, 3.56]}
+    hard: {reaction_latency: [1.99, 1.99]}
+  B4:
+    easy: {reaction_latency: [6.76, 6.76]}
+    medium: {reaction_latency: [3.79, 3.79]}
+    hard: {reaction_latency: [2.12, 2.12]}
+
+  B5:
+    easy: {reaction_latency: [7.28, 7.28]}
+    medium: {reaction_latency: [4.07, 4.07]}
+    hard: {reaction_latency: [2.28, 2.28]}
+  # B6/B7: raised to the 1.0 s floor (2026-11-17; were 1.0 / 0.79 / 0.63 and
+  # 2.0 / 1.12 / 0.63 s). No visible consequence is tied to the old values: B6's pressure
+  # needle only oscillates until the vent, and B7's inflow is 10 mL / deadline, so the
+  # carboy still overflows exactly at the deadline.
+  B6:
+    easy: {reaction_latency: [1.3, 1.3]}
+    medium: {reaction_latency: [1.14, 1.14]}
+    hard: {reaction_latency: [1.0, 1.0]}
+  B7:
+    easy: {reaction_latency: [1.3, 1.3]}
+    medium: {reaction_latency: [1.14, 1.14]}
+    hard: {reaction_latency: [1.0, 1.0]}
+
+robot:
+  model: dual_arx_x5
+  # One common dual-X5 rig for every task, RoboDojo geometry (roboclock.envs.robodojo_rig;
+  # docs/robodojo-rig-spec.md): both bases side by side at the same height and forward
+  # coordinate, both facing the rig's forward direction (yaw), 0.60 m apart center to
+  # center. `origin` is the midpoint of the two bases on the mount plane; the left arm
+  # (side 0, /World/ARXLeft, the single-arm worker) is at origin - 0.30 m along the rig's
+  # left axis, i.e. on the rig's RIGHT; the right arm (side 1) on the rig's left. The head
+  # camera is rigid at (0.04, 0, 0.543) m in the rig frame, pitched 60 deg down, no yaw.
+  # Only origin (incl. mount height) and yaw vary by task.
+  rig:
+    default: {origin: [0.10, 0.20, 1.05], yaw: 0.0}
+    tasks:
+      A1: {origin: [0.0, 0.18, 1.05]}
+      # A3/A4: raised so the column / burette top (solvent head, burette scale) stays
+      # inside the 60-deg head camera image (was 1.05 / 1.10 m).
+      A3: {origin: [0.10, 0.20, 1.11]}
+      A4: {origin: [0.10, 0.02, 1.16]}
+      A5: {origin: [0.08, 0.30, 1.15]}
+      A6: {origin: [0.08, 0.30, 1.15]}
+      # Reactive deadlines: the rig is lowered (and B2/B3/B6/B7 shifted 0.10 m toward
+      # +y) so the resting tool starts closer to the actuator. With the default
+      # pose B3/B4 hard and B6 medium/hard missed their reaction deadlines.
+      # B2/B3 0.03 m toward -y: the power supply otherwise leaves the right edge of the head
+      # image. B4 is centred on the test tube (nominal y = -0.18), so the tube stands
+      # straight ahead between the two arms (2026-11-19); 0.06 m further forward than the
+      # others, or the rig-right arm cannot lift the tilted tube with its grasp
+      # orientation (IK fails at x = 0.10). Its STATE lamp moved with it (layout.py). B5's freezer is centred in front
+      # of the rig (safety_geometry.FREEZER_XY), its door facing the rig.
+      B2: {origin: [0.10, 0.27, 0.95]}
+      B3: {origin: [0.10, 0.27, 0.95]}
+      B4: {origin: [0.16, -0.18, 0.95]}
+      B5: {origin: [0.15, 0.16, 1.29]}
+      B6: {origin: [0.10, 0.30, 0.95]}
+      B7: {origin: [0.10, 0.30, 0.95]}
+      C1: {origin: [0.0, 0.0, 1.05]}
+      C2: {origin: [0.0, 0.0, 1.05]}
+      C3: {origin: [0.0, 0.0, 1.05]}
+  # Convex-hull artifact: link2 touches base_link at joint2 ~2.45 rad when the arm
+  # points sideways, blocking low far goals that IK solves (see robot.py).
+  self_collision_filters: [[base_link, link2]]
+  self_collision_filter_tasks: [C1, C2, C3]
+  # Independent samples can be assigned to both arms; C1-C3 use both hands.
+  cooperative_tasks: [C1, C2, C3]
+
+# Full-flow margins. Actual deadlines follow measured delivered volume.
+liquid_tasks:
+  # One low-flow metering outlet for every level (10 mL/s = 0.6 L/min with the handle fully
+  # open; an ordinary laboratory faucet delivers far more, 2.8 L/min for a flow-controlled
+  # nozzle); difficulty is the accepted volume band below the 500 mL graduation (6 / 4 / 2 s
+  # of flow).
+  A1:
+    initial_volume_ml: 0.0
+    flow_ml_s: 10.0
+    minimum_volume_ml: {easy: 440.0, medium: 460.0, hard: 480.0}
+  # Collection window before the blue phase runs out (5 mL/s): 4 / 2.5 / 1.5 s = at most
+  # 20 / 12.5 / 7.5 mL of blue left in the funnel (2026-11-19; was 10 / 6 / 3 s = 50 / 30 / 15
+  # mL, which accepted a close far from the interface). The oracle leaves ~4 mL.
+  A2:
+    margin_seconds: {easy: 4.0, medium: 2.5, hard: 1.5}
+  A3:
+    switch_seconds: {easy: 20.0, medium: 12.0, hard: 5.0}
+  # Full-open titrant flow is 2 mL / margin = 0.33 / 0.50 / 1.0 mL/s. Easy and medium are within
+  # a Class A 50 mL buret (ASTM E287 Table 2: at most 0.42-0.56 mL/s); hard's 1.0 mL/s is within
+  # Class B / ISO 385 type II 50 mL buret delivery (ASTM E287 Table 3: 50 mL in no less than 50 s).
+  A4:
+    margin_seconds: {easy: 6.0, medium: 4.0, hard: 2.0}
+
+liquid_visuals:
+  # RaytracedLighting since 2026-11-03 (speed); set PathTracing for offline-quality liquid renders.
+  renderer: RaytracedLighting
+  path_tracing_bounces: 16
+  hdr_intensity: 160.0
+  key_intensity: 100.0
+  fill_intensity: 30.0
+
+# Timed transfers. A5: film stop bath before the fixer, 12 s (Ilford ILFOSTOP: "at least 10
+# seconds"; Kodak ED-BWF: "Rinse/stop bath 0:30"). A6: 30 s heat shock (Thermo Fisher One Shot
+# TOP10 user guide: "exactly 30 seconds"). The timing tolerances (tasks/temporal_window/
+# bath_transfer.py) are benchmark settings, not chemical or biological ones.
+bath_tasks:
+  A5: {duration_s: 12.0}
+  A6: {duration_s: 30.0}

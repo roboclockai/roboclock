@@ -1,0 +1,90 @@
+# Single-request speed of each open VLM on one 8x A100-SXM4-80GB node, with its fastest speculative
+# decoder, for `roboclock eval --inference-latency ideal --model-speeds <this file>` (the open-VLM LTSR runs,
+# docs/vlm-ltsr.md). The default model_speeds.yaml instead holds the fastest surveyed provider speeds.
+#
+# Each query is charged L = ttft_s + output_tokens / max_tokens_per_s of simulated time; output_tokens
+# is the reply's completion tokens, thinking included.
+#
+# How these were measured (2026-11-09/10, the 8 GPUs otherwise idle):
+# - Server: vLLM 0.32, bf16, tensor parallel 8, prefix caching, the model's reasoning parser, with
+#   OMP_NUM_THREADS/MKL_NUM_THREADS unset (the NGC image's 95 threads per TP worker slow speculative
+#   decoding about 9x).
+# - Requests: 30 real C1-agent requests (8 episodes, 3-4 turns each, head and wrist images included,
+#   thinking budget 1024, temperature 0) captured from Qwen3.8-27B episodes, replayed one at a time.
+#   The first request is a warm-up and is not counted.
+# - max_tokens_per_s = sum(output tokens - 1) / sum(first-to-last-token time), on the model's own replies.
+#   ttft_s = mean time to the first streamed token (image encoding, prefill and prefix-cache hits).
+# - Each model's variants: no drafter, its MTP head where it has one, and its DFlash or official assistant
+#   drafter. The fastest at the model's mean reply length is listed; the others are in notes.
+#   Requests during which another process held a GPU were dropped (n in notes).
+# Greedy speculative decoding gives the same replies as plain decoding up to bf16 numerics, so the runs
+# themselves can be served any way; only this file sets the charged time.
+
+models:
+  Qwen/Qwen3.8-27B:
+    max_tokens_per_s: 274.1
+    ttft_s: 0.32
+    source: >-
+      Measured: 8x A100-SXM4-80GB, TP8, vLLM 0.32, DFlash2 drafter incoai/Qwen3.8-27B-DFlash2, 7 draft
+      tokens (30 replayed C1 requests, mean 1169 output tokens, 2483 prompt tokens)
+    surveyed: 2026-11-09
+    notes: >-
+      Mean charge per query 4.59 s; 3.93 tokens per verification step. No drafter 112.5 tok/s, ttft 0.27 s
+      (n 12); built-in MTP, 3 draft tokens 237.0 tok/s, ttft 0.32 s (n 30, 3.10 tokens per step).
+  meta-models/Muse-Glimmer-30B:
+    max_tokens_per_s: 259.8
+    ttft_s: 0.24
+    source: >-
+      Measured: 8x A100-SXM4-80GB, TP8, vLLM 0.32, Meta's DFlash drafter
+      meta-models/Muse-Glimmer-30B-assistant, 15 draft tokens (30 replayed C1 requests, mean 1165 output
+      tokens, 2515 prompt tokens)
+    surveyed: 2026-11-09
+    notes: >-
+      Mean charge per query 4.72 s; 4.10 tokens per verification step. No drafter 90.8 tok/s, ttft 0.24 s
+      (n 12). Muse Glimmer has no MTP head.
+  google/gemma-4-26B-A4B-it:
+    max_tokens_per_s: 289.5
+    ttft_s: 0.44
+    source: >-
+      Measured: 8x A100-SXM4-80GB, TP8, vLLM 0.32, DFlash drafter z-lab/gemma-4-26B-A4B-it-DFlash, 15
+      draft tokens (30 replayed C1 requests, mean 1113 output tokens, 2752 prompt tokens)
+    surveyed: 2026-11-09
+    notes: >-
+      Mean charge per query 4.28 s; 4.11 tokens per verification step. No drafter 192.6 tok/s, ttft 0.68 s
+      (n 12); Google's MTP drafter google/gemma-4-26B-A4B-it-assistant, 4 draft tokens 289.1 tok/s, ttft
+      0.51 s (n 30, 3.68 tokens per step). Only 1.5x over no drafter: a MoE verifying several tokens
+      activates more experts than one decode step.
+  Qwen/Qwen3.5-9B:
+    max_tokens_per_s: 500.4
+    ttft_s: 0.23
+    source: >-
+      Measured: 8x A100-SXM4-80GB, TP8, vLLM 0.32, built-in MTP head, 3 draft tokens (30 replayed C1
+      requests, mean 1133 output tokens, 2445 prompt tokens)
+    surveyed: 2026-11-09
+    notes: >-
+      Mean charge per query 2.49 s; 3.14 tokens per verification step. No drafter 275.2 tok/s, ttft 0.20 s
+      (n 12); DFlash drafter z-lab/Qwen3.5-9B-DFlash, 15 draft tokens 475.3 tok/s, ttft 0.23 s (only n 2
+      clean requests, 4.21 tokens per step).
+  Qwen/Qwen3.5-4B:
+    max_tokens_per_s: 562.1
+    ttft_s: 0.22
+    source: >-
+      Measured: 8x A100-SXM4-80GB, TP8, vLLM 0.32, built-in MTP head, 3 draft tokens (30 replayed C1
+      requests, mean 1151 output tokens, 2445 prompt tokens)
+    surveyed: 2026-11-09
+    notes: >-
+      Mean charge per query 2.27 s; 3.08 tokens per verification step. No drafter 255.9 tok/s, ttft 0.23 s
+      (n 12); DFlash drafter z-lab/Qwen3.5-4B-DFlash, 15 draft tokens 528.6 tok/s, ttft 0.29 s (n 30, 4.23
+      tokens per step). vllm-project/Qwen3.5-4B-DFlash2 was not measured: it was trained against a GPTQ
+      target and needs trust-remote-code.
+  Qwen/Qwen3.8-Flash-Next:
+    max_tokens_per_s: 212.0
+    ttft_s: 0.48
+    source: >-
+      Measured: 8x A100-SXM4-80GB, TP8, vLLM 0.32, built-in MTP head, 3 draft tokens (30 replayed C1
+      requests, mean 1158 output tokens, 2483 prompt tokens)
+    surveyed: 2026-11-10
+    notes: >-
+      180B MoE, 10 of 512 experts per token. Mean charge per query 5.94 s; 2.64 tokens per verification
+      step. No drafter 116.3 tok/s, ttft 0.50 s (n 12); MTP with 2 draft tokens 197.6 tok/s, ttft 0.52 s
+      (n 20, 2.26 tokens per step).

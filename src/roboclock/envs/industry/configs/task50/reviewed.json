@@ -1,0 +1,240 @@
+{
+  "task_id": 50,
+  "embodiment": "dual_arx_x5",
+  "seed": 0,
+  "pan_xy_jitter_m": [
+    [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ]
+  ],
+  "start_s": 1.0,
+  "mass_scale": 1.0,
+  "budget_s": 90.0,
+  "physics_hz": 250,
+  "solver_velocity_iterations": 1,
+  "enable_stabilization": false,
+  "maximum_pan_face_tilt_deg": 5.0,
+  "runtime_joint_velocity_limit_rad_s": 0.73,
+  "runtime_finger_velocity_limit_m_s": 0.038,
+  "carrier_handling_rotation_rate_rad_s": 0.5,
+  "carrier_close_command_rate_m_s": 0.002,
+  "delivery_payload": "original_case_and_four_free_pans",
+  "case_grip": {
+    "tool_offset_m": [
+      0,
+      -0.053314,
+      0.0215
+    ],
+    "original_front_band_y_m": [
+      -0.0602,
+      -0.046428
+    ],
+    "original_front_band_height_m": 0.01156218,
+    "jaw_axis": "Case localY; downward approach pinches the original front lip above the empty recess floor, clear of all four pans",
+    "bilateral_force_target_N": 12.0,
+    "opening_per_slider_m": 0.012,
+    "output_withdraw_clearance_m": 0.14,
+    "finger_position_stiffness_N_m": 4000.0,
+    "finger_damping_N_s_m": 80.0,
+    "effort_cap_N": 20.0,
+    "alignment": {
+      "position_m": 0.0003,
+      "orientation_rad": 0.003,
+      "dwell_s": 0.1
+    },
+    "supported_unload": {
+      "native_output_support_N": 0.6,
+      "support_dwell_s": 0.15,
+      "opening_rate_m_s": 0.002,
+      "released_slider_travel_m": 0.009,
+      "scope": "Seat original case on the output tray before gradual jaw unloading; freeze the tool waypoint during release. No free drop of the loaded case."
+    }
+  },
+  "carrier_control": "Stationary unscored assembly nest; direct original case-front-lip native grasp, measured4mm/0.03rad payload endpoint gates and original bounded joint drives. No product attachments.",
+  "carrier_yaw_deg": [
+    90,
+    -90
+  ],
+  "pan_release_alignment": {
+    "position_m": 0.0005,
+    "orientation_rad": 0.005,
+    "dwell_s": 0.1,
+    "floor_clearance_m": 0.008
+  },
+  "pan_release_stability": {
+    "dwell_s": 0.2,
+    "position_span_m": 0.0002,
+    "orientation_from_first_deg": 0.2,
+    "scope": "Continuous actual pan and case poses, original slot containment/support and no hand contact. Raw contact-step velocities remain logged diagnostics."
+  },
+  "carrier_output_stability": {
+    "dwell_s": 0.5,
+    "position_span_m": 0.0005,
+    "orientation_from_first_deg": 0.3,
+    "scope": "Consecutive actual native poses of original case and all4 pans with native output support and no hand contacts; assembly nest must remain stationary. Raw velocities retained separately."
+  },
+  "required_palettes": 2,
+  "randomization": {
+    "layout": false,
+    "timing": false,
+    "physical": false
+  },
+  "bounds": {
+    "pan_xy_jitter_m": [
+      -0.0008,
+      0.0008
+    ],
+    "start_s": [
+      1,
+      2
+    ],
+    "mass_scale": [
+      0.9,
+      1.1
+    ]
+  },
+  "independence": "Independent SeedSequence layout/temporal/physical streams",
+  "controller": "Privileged-state bounded original joint-drive oracle",
+  "scoring": "Two four-color palettes, unique correct pans fully within original pockets, released native support and output tray delivery within90s",
+  "assumptions": "Existing source four-pocket case/pans,25mm feeder posts and stationary original tray/35mm assembly supports. Original products unchanged; direct case-front-lip grip and release into lower front output tray. Free case/pans, no product attachments. Candidate masses/friction, not calibrated.",
+  "output_tray_xy_m": [
+    [
+      -0.5,
+      0.69
+    ],
+    [
+      0.5,
+      0.69
+    ]
+  ],
+  "output_tray_floor_m": 0.8974,
+  "output_tray_size_m": [
+    0.26,
+    0.22,
+    0.025
+  ],
+  "case_transfer_xy_m": [
+    [
+      [
+        -0.5,
+        0.43
+      ],
+      [
+        -0.5,
+        0.69
+      ]
+    ],
+    [
+      [
+        0.5,
+        0.43
+      ],
+      [
+        0.5,
+        0.69
+      ]
+    ]
+  ],
+  "sha256": "9b6891fbf75ab85fc2533c123a6baff6fad9091372e3f527b3300c6fb4a59998"
+}

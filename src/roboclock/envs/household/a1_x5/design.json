@@ -1,0 +1,141 @@
+{
+  "id": "A1",
+  "revision": "R3 (2026-11-19): sugar pour replaces the tea infuser",
+  "embodiment": "Dual ARX X5, stationary island mount (common rig: bases side by side at x=0.00 / 0.60 m, y=-0.255 m, 0.60 m apart, facing +y; RoboDojo head camera 0.04 m forward of the base midpoint, 0.543 m above the mount tops, 60 deg down, Gemini 345Lg 640x480; D435 wrist cameras on link6); ready pose q=[0, .94, 1.34, -1.40, 0, 0]",
+  "time_origin": "t=0 at the first agent observation; process and physics continue during agent deliberation",
+  "interface": "Agent/LLM action and observation interface intentionally undefined in this revision; see README",
+  "status": "design + static initial state + task/process/scoring model + Isaac Sim physics episode with a privileged oracle controller (sim.py), validated against the task model and an independent trajectory check, and recorded",
+  "title": "Sweeten a glass of tea with sugar from a jar and stir it",
+  "category": "A temporal window",
+  "household_need": "Sweeten a glass of tea by pouring sugar straight from the jar: too little and it is not sweet, too much and it is sickly; the pour has to stop by eye while the sugar piles up on the bottom.",
+  "instruction": "Add 10 to 25 g of sugar from the open jar to the glass of tea. Sugar runs once the jar tilts past 40-60 degrees (later when emptier), faster with more tilt (max 4 g/s), and settles as a white mound: 10 g is 5.2 cm across, 25 g 7.0 cm. 2 g spilled outside the glass fails. Set the jar down upright and let go. Then stir two full clockwise turns (seen from above), the spoon's whole head under the surface, and put the spoon back in its basket, released. No stirring until the jar is down.",
+  "core_interventions": [
+    "left arm: pick up the open sugar jar, tilt it over the glass, stop the pour in the gram band, set the jar down upright and release it",
+    "right arm: once the jar is down, stir two net clockwise turns and release the spoon in the basket"
+  ],
+  "process": {
+    "state": "grams of sugar in the glass m (and in the jar, and in the air)",
+    "model": "q = 4 g/s x c x min(1, (theta - theta0) / 35 deg)^1.5 while the jar tilt theta exceeds theta0 = 30 + 80 x (1 - jar sugar / 94 g) deg; sugar leaving the mouth lands with a 0.12 s time constant, in the glass if the stream from the jar's lowest mouth point falls inside the glass mouth, else spilled",
+    "hidden": {
+      "jar_sugar_g": "U[60, 85] g at the start (onset tilt 38-59 deg)",
+      "flow_coefficient": "U[0.85, 1.15]"
+    },
+    "nominal": {
+      "jar_sugar_g": 75.0,
+      "flow_coefficient": 1.0,
+      "onset_deg": 46.2,
+      "max_flow_g_s": 4.0,
+      "target_band_g": {
+        "easy": [
+          10,
+          30
+        ],
+        "medium": [
+          10,
+          25
+        ],
+        "hard": [
+          10,
+          15
+        ]
+      },
+      "note": "band per tier chosen by the user (2026-11-19); the pour is the same at every tier (time_scale unused). At the fastest hidden flow and full tilt the hard band lasts 5 / 4.6 = 1.09 s (1 s floor of the time-limit rule); easy 4.3 s, medium 3.3 s"
+    },
+    "cue": "sugar mound on the glass bottom (cone at the 33 deg slope of settled sugar, sized from the grams: 10 g 5.2 cm, 15 g 5.9 cm, 25 g 7.0 cm, 30 g 7.5 cm across; the bottom is 7.7 cm), seen through the clear tea from the head camera; the falling stream; the sugar left in the glass jar. Stirring dissolves the mound (appearance only)"
+  },
+  "timing": {
+    "event": "the jar set down upright and released (>= 1 s): the grams in the glass then are judged",
+    "rule": "quality 1 inside the tier's band; linear penalty to 0 at 5 g and at 10 g above the band",
+    "early": "not sweet enough",
+    "late": "too sweet"
+  },
+  "completion": {
+    "physical": [
+      "sugar poured from the jar",
+      "jar released upright (< 10 deg) and supported on the counter >= 1 s",
+      "spilled sugar < 2 g",
+      "spoon head stayed in the glass, under the tea, during 2 net clockwise turns",
+      "stirring only after the jar is down",
+      "spoon released, supported in basket, low speed >= 1 s",
+      "glass not displaced > 2 cm"
+    ],
+    "temporal": "grams in the glass at the set-down inside the tier's band"
+  },
+  "failures": [
+    "2 g or more spilled",
+    "jar, spoon or glass dropped or the jar left lying",
+    "stirring before the jar is down"
+  ],
+  "permitted": [
+    "pouring in several tilts",
+    "pre-grasping the spoon while the sugar pours"
+  ],
+  "prohibited": [
+    "taking sugar back out of the glass"
+  ],
+  "arm_roles": "left: sugar jar; right: spoon (dual-arm by user design)",
+  "demo_guidance": [
+    "Physics overlay and oracle: src/roboclock/envs/household/a1_x5/sim.py. The left arm pinches the jar body 3.5 cm up (tool azimuth 45 deg, 10 deg down; reach-screened, >= 0.27 rad joint margin), carries it upright beside the glass and tilts it toward +x while the mouth moves over the glass.",
+    "The tilt rises at 45 deg/s to the first flow, is servoed to 2.5 g/s and tips back once glass + air + 0.3 s of flow reach the middle of the band (privileged task grams).",
+    "The right arm's spoon routine is the tea-infuser version's, gated on the jar being released."
+  ],
+  "open_items": [
+    "sugar is a process model, not granular physics: the mound, the stream and the sugar in the jar are drawn from the task's grams; the sugar in the jar stays a level cylinder in the jar's frame while it tilts",
+    "the stir dissolves the mound fully after the two turns (appearance only); the tea's colour does not change",
+    "the jar's 120 g glass mass plus its sugar is a fixed 200 g rigid body"
+  ],
+  "assets": [
+    {
+      "name": "TeaGlass",
+      "role": "glass of tea (lathe proxy, OmniGlass; tea a tinted clear volume)",
+      "source": "authored in src/roboclock/envs/household/a1_x5/scene.py",
+      "size_m": [
+        0.085,
+        0.085,
+        0.0814
+      ]
+    },
+    {
+      "name": "SugarJar",
+      "role": "open glass jar of sugar",
+      "source": "src/roboclock/envs/household/assets/x5/objects/sugar_jar_0/sugar_jar.usda (\"Glass Jar\" by Extrone, Sketchfab, CC BY 4.0, via Objaverse 1.0; scripts/household/import_sugar_jar.py)",
+      "size_m": [
+        0.054,
+        0.054,
+        0.0736
+      ]
+    },
+    {
+      "name": "SugarMound / SugarStream",
+      "role": "process cues (cone, cylinder)",
+      "source": "authored in src/roboclock/envs/household/a1_x5/scene.py",
+      "size_m": null
+    },
+    {
+      "name": "SpoonBasket",
+      "role": "utensil basket holding the spoon",
+      "source": "src/roboclock/envs/household/assets/x5/lightwheel_kitchen/Collected_KitchenRoom/KitchenRoom_A1.usdc",
+      "size_m": [
+        0.1251,
+        0.0829,
+        0.0431
+      ]
+    },
+    {
+      "name": "Spoon",
+      "role": "stirring spoon (HANDAL scan)",
+      "source": "src/roboclock/envs/household/assets/x5/reused/spoon/spoon_2.usd",
+      "size_m": [
+        0.0383,
+        0.1176,
+        0.0998
+      ]
+    }
+  ],
+  "files": {
+    "task_model": "src/roboclock/envs/household/a1_x5/task.py",
+    "scene_builder": "src/roboclock/envs/household/a1_x5/scene.py",
+    "simulation": "src/roboclock/envs/household/a1_x5/sim.py",
+    "superseded": "tea-infuser version (R2): git history before 2026-11-19; demo in results/household/x5_demos_superseded_2026-11-19/A1_tea"
+  }
+}

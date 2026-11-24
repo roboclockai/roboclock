@@ -1,0 +1,161 @@
+{
+  "task_id": 49,
+  "embodiment": "dual_arx_x5",
+  "seed": 1,
+  "part_xy_jitter_m": [
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ]
+  ],
+  "start_s": 1.0,
+  "mass_scale": 1.0,
+  "bounds": {
+    "part_xy_jitter_m": [
+      -0.001,
+      0.001
+    ],
+    "start_s": [
+      1,
+      2
+    ],
+    "mass_scale": [
+      0.9,
+      1.1
+    ]
+  },
+  "randomization": {
+    "layout": false,
+    "timing": false,
+    "physical": false
+  },
+  "finger_torsional_patch_radius_m": 0.0,
+  "finger_min_torsional_patch_radius_m": 0.0,
+  "budget_s": 120.0,
+  "arm_command_speed_rad_s": 0.7,
+  "runtime_joint_velocity_limit_rad_s": 0.7,
+  "runtime_finger_velocity_limit_m_s": 0.02,
+  "required_parts": 3,
+  "underweight": [
+    false,
+    false,
+    true
+  ],
+  "part_mass_kg": [
+    0.15,
+    0.15,
+    0.105
+  ],
+  "sort_results": [
+    "PASS",
+    "PASS",
+    "REJECT"
+  ],
+  "weighing": {
+    "pan_xy_m": [
+      0.0,
+      0.47
+    ],
+    "pan_top_z_m": 0.92785,
+    "min_g": 125,
+    "nominal_kg": 0.15,
+    "underweight_kg": 0.105,
+    "dwell_s": 0.5,
+    "display_update_s": 0.2,
+    "sampling": "SeedSequence child 3, independent per part: REJECT draw = underweight (70 % mass).",
+    "scope": "Reading = measured native pan contact normal force / g; the display shows the 0.4 s mean once the load stays within 2 g over 0.4 s (refreshed every 0.2 s), else its last stable value. Weighed once resting alone, released and at rest on the pan for dwell_s. PASS at min_g or more, else REJECT."
+  },
+  "source_positions_xy_m": [
+    [
+      -0.28,
+      0.73
+    ],
+    [
+      0,
+      0.73
+    ],
+    [
+      0.12,
+      0.73
+    ]
+  ],
+  "source_yaw_deg": 0,
+  "input_tray_dimensions_m": [
+    0.64,
+    0.24,
+    0.035
+  ],
+  "receivers_by_arm_xy_m": {
+    "left": {
+      "PASS": [
+        -0.45,
+        0.625
+      ],
+      "REJECT": [
+        -0.645,
+        0.625
+      ]
+    },
+    "right": {
+      "PASS": [
+        0.45,
+        0.625
+      ],
+      "REJECT": [
+        0.645,
+        0.625
+      ]
+    }
+  },
+  "receiver_size_m": [
+    0.18,
+    0.21,
+    0.035
+  ],
+  "receiver_inner_half_xy_m": [
+    0.075,
+    0.09
+  ],
+  "receiver_slot_offsets_y_m": [
+    -0.04,
+    0.04
+  ],
+  "deposit_tool_yaw_deg": {
+    "left": 90,
+    "right": 90
+  },
+  "arm_assignments": {
+    "left": [
+      0
+    ],
+    "right": [
+      2,
+      1
+    ]
+  },
+  "joint_transit": {
+    "height_m": 1.06,
+    "loaded_joint_speed_rad_s": 0.7,
+    "loaded_linear_speed_m_s": 0.22,
+    "loaded_angular_speed_rad_s": 0.9,
+    "empty_joint_speed_rad_s": 0.7,
+    "empty_linear_speed_m_s": 0.3,
+    "empty_angular_speed_rad_s": 1.5,
+    "sampled_original_part_floor_m": 1.0,
+    "sampled_empty_tool_floor_m": 0.99,
+    "profile": "minimum jerk"
+  },
+  "final_clearance_m": 0.1,
+  "interlocks": "Only the scale is exclusive. An arm claims it while the other arm's tool is outside |x| <= 0.2 m and not weighing. Neighbouring feed nests (< 0.3 m apart) are not entered by both arms at once. Original inter-arm collisions enabled.",
+  "controller": "Privileged native-state bounded original joint drives; minimum-jerk Cartesian segments and joint transits.",
+  "completion_event": "Third weighed part fully released, supported and at rest in a tray of its weight result for 0.3 s.",
+  "sha256": "86c1decfb025a58b5218c1e274826ed01e269bb1161b6e0fcc3aa66dd6b0e863"
+}

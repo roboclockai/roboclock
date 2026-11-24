@@ -1,0 +1,9 @@
+# Physics/oracle-only runs of the sports tasks (layout and controller iteration):
+#   python -m roboclock eval --env sports --policy oracle --oracle --task B4 \
+#     --config src/roboclock/envs/sports/configs/no_render.yaml ...
+# No camera is built, no renderer setting is applied and no render call is made;
+# observations carry zero images of the rig-camera shapes (also with --depth). Use benchmark.yaml (rendered)
+# for acceptance runs and anything a visual policy sees.
+base: benchmark.yaml
+sim:
+  no_render: true

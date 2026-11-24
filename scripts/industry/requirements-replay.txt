@@ -1,0 +1,7 @@
+# Direct versions recorded on the RTX native-validation host, Python3.12.
+# Install the root sim6 extra first; SDK/extension pins are maintained there.
+numpy==2.3.1
+scipy==1.17.0
+Pillow==12.2.0
+PyYAML==6.0.3
+gymnasium==1.4.0

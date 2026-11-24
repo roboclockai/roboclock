@@ -1,0 +1,10 @@
+# Preserve binary assets and the exact generated USD/evidence bytes.
+*.mp4 binary
+*.png binary
+*.jpg binary
+*.usdc binary
+*.usd -text whitespace=-blank-at-eof
+*.usda -text whitespace=-blank-at-eof
+# Lab manifests hash exact asset bytes, including upstream CRLF source files.
+assets/lab/** -text
+src/roboclock/envs/lab/assets/** -text

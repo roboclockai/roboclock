@@ -1,0 +1,67 @@
+{
+  "observation_profile": "minimal",
+  "task_instructions_separate_from_rgb": true,
+  "task_descriptions": [
+    {
+      "task_id": 41,
+      "temporal_category": "A",
+      "instruction": "Pick up the aluminium part from the loading pad between the baths and lower it into the zincate dip bath until the whole part is below the liquid surface. Keep it fully immersed for the dip time, then lift it clear of the zincate bath surface, transfer it, release it and leave it supported in the rinse bath.",
+      "time_requirement": "For the approved adjustable demonstration recipe, complete whole-part exit from the zincate bath 20–40 s after full immersion. This is a demonstration recipe on the time scale of a zincate pre-treatment dip on aluminium, not calibrated chemistry."
+    },
+    {
+      "task_id": 42,
+      "temporal_category": "A",
+      "instruction": "Pick up the pump housing and place it upright and fully supported in the carrier marked with a yellow border while the rotary accumulation table continues moving. Release the housing and withdraw without obstructing the table.",
+      "time_requirement": "Complete supported placement while the carrier is inside the 60° loading sector at 5°/s, a 12 s window."
+    },
+    {
+      "task_id": 43,
+      "temporal_category": "A",
+      "instruction": "Pick up the matched cover. After hot-melt adhesive dispensing finishes, align and seat the cover on the housing within the allowed window, then release it and withdraw. The housing may remain supported by its fixture.",
+      "time_requirement": "Complete released, stable seating 2–14 s after hot-melt adhesive application finishes."
+    },
+    {
+      "task_id": 44,
+      "temporal_category": "B",
+      "instruction": "Act as the emergency shut-off for the coolant line: when the downstream pipe begins leaking, grasp and fully close the isolation valve. Release the valve after closure. Keep the collected spill below the tray's marked maximum.",
+      "time_requirement": "Fully close the valve within 5 s of leak onset. The current demonstration's tray limit is 2.0 L."
+    },
+    {
+      "task_id": 45,
+      "temporal_category": "B",
+      "instruction": "When the red motor-test fault indicator lights, press the emergency-stop button far enough to actuate it. Allow the motor to stop, then withdraw.",
+      "time_requirement": "Actuate the stop button within 3 s of the warning."
+    },
+    {
+      "task_id": 46,
+      "temporal_category": "B",
+      "instruction": "Watch the bearing emerge from the finishing machine. If the QC lamp turns red, arrest the rolling bearing wholly inside the marked safety area, then grasp it, lift it and release it into the rework tray.",
+      "time_requirement": "Arrest within 3 s of measured safety-zone entry. Recovery follows the arrest and must finish with released tray support."
+    },
+    {
+      "task_id": 47,
+      "temporal_category": "C",
+      "instruction": "Pack one bearing, one bracket and one pin into each dedicated maintenance case at the fixed workcell. Release all components into the insert and leave them fully supported. Both arms may cooperate.",
+      "time_requirement": "Complete at least 2 fully packed maintenance kits within 90 s. No mobile-base travel or delivery is required."
+    },
+    {
+      "task_id": 48,
+      "temporal_category": "C",
+      "instruction": "Move automotive-parts cartons from the pallet into their matching shelf locations. Match printed SKU identity to shelf identity: A to A-01 and B to B-01. Release each carton upright on the shelf and withdraw before counting it.",
+      "time_requirement": "Correctly shelve at least 3 cartons within 90 s at the fixed pallet-and-shelf workcell. No mobile-base travel or delivery is required."
+    },
+    {
+      "task_id": 49,
+      "temporal_category": "C",
+      "instruction": "Weigh each metal part on the bench scale between the arms: set it on the pan, release it and read the display once the part has rested there alone for 0.50 s. A part of 125 g or more is PASS and a lighter part is REJECT. Place each part into the corresponding labeled tray, release it and withdraw. Either arm may use either tray.",
+      "time_requirement": "Weigh and correctly sort all 3 parts."
+    },
+    {
+      "task_id": 50,
+      "temporal_category": "C",
+      "instruction": "Fill each eyeshadow case with champagne, rose, copper and deep-brown pans in the specified 2×2 arrangement. With the case in its original upright recipe orientation, the far row is champagne/rose and the near row is copper/deep brown, left to right. Directly grasp the completed case and release it into output; leave the assembly nest on the bench.",
+      "time_requirement": "Assemble and deliver at least 2 complete four-color palettes within 90 s."
+    }
+  ],
+  "scope_revision": "Review, October22: remove mobile-base travel/delivery from Tasks47/48; retain fixed-cell manipulation and original throughput targets."
+}

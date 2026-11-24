@@ -1,0 +1,118 @@
+{
+  "id": "B3",
+  "revision": "R4 (2026-11-18): random delayed ignition; wait for visible flames before turning the burner off",
+  "embodiment": "Dual ARX X5, stationary island mount (common rig: bases side by side at x=0.00 / 0.60 m, y=-0.255 m, 0.60 m apart, facing +y; RoboDojo head camera 0.04 m forward of the base midpoint, 0.543 m above the mount tops, 60 deg down, Gemini 345Lg 640x480; D435 wrist cameras on link6); ready pose q=[0, .94, 1.34, -1.40, 0, 0]",
+  "time_origin": "t=0 at the first agent observation; process and physics continue during agent deliberation",
+  "interface": "Agent/LLM action and observation interface intentionally undefined in this revision; see README",
+  "status": "design + static initial state + task/process/scoring model + Isaac Sim physics episode with a privileged oracle controller (sim.py), validated against the task model and an independent trajectory check, and recorded (one reference episode, seed 0)",
+  "title": "Turn off the burner under a pot of burning oil",
+  "category": "B event-reactive",
+  "household_need": "Burning oil in a pot on the hob: the heat must be shut off at once, before the fire spreads, and water makes it explode. The time scale is that of an oil pan fire under wall cabinets without a range hood: the cabinets are at risk after as little as 40 s of free burning and can ignite from 75 s (Budnick and Klein, NBSIR 75-788, 1976); here the flame spreads at 48 s nominal (64 s easy, 32 s hard, which is about 1.25x short of the 40 s). The task requires only the burner off and the knob released: in this abstraction that puts the flame out within seconds, and no lid is used (lid step removed 2026-11-02). Real guidance also covers the pan with a lid, and cutting the heat alone does not put out burning oil.",
+  "instruction": "The oil in the pot on the stove may catch fire at an unpredictable time. Wait for visible flames, then turn off its burner before the fire spreads: its knob is the middle one of the five and goes off with a quarter turn clockwise (seen from above), to its stop. The gas is off only within 10 degrees of that stop, and it counts once no gripper touches the knob, so let go. The pot's front handle overhangs the cooktop: its edge is 6 cm behind the knob's axis, 5 to 9 cm above the knob.",
+  "core_interventions": [
+    "turn the centre burner knob to OFF and release"
+  ],
+  "process": {
+    "state": "flame intensity f, initially zero until ignition",
+    "model": "Before ignition: f = 0; at the sampled time, if the burner is on: f = f0; burner on: df/dt = g f (1 - f); burner off: df/dt = -f / 1 s; spread at f = 0.8",
+    "hidden": {
+      "growth": "U[0.05, 0.08] 1/s",
+      "f0": "U[0.12, 0.18]",
+      "ignition_time": "U[2, 8] s after the first observation; seeded and independent of difficulty"
+    },
+    "nominal": {
+      "growth": 0.065,
+      "f0": 0.15,
+      "time_to_spread_s": 48,
+      "ignition_time_s": 5.0
+    },
+    "cue": "flame cards in the pot (agent camera)"
+  },
+  "timing": {
+    "event": "visible ignition; heat off = knob below 10 deg with no hand contact after ignition",
+    "rule": "loss = flame exposure after ignition; spread at 0.8 fails; no completion before ignition"
+  },
+  "completion": {
+    "physical": [
+      "knob at OFF by robot contact",
+      "hand released",
+      "flame out for 3 s"
+    ],
+    "temporal": "flame never reaches 0.8"
+  },
+  "failures": [
+    "fire spread (f >= 0.8)",
+    "water on the oil fire",
+    "pot moved > 3 cm",
+    "wrong knob turned"
+  ],
+  "permitted": [],
+  "prohibited": [
+    "carrying the burning pot"
+  ],
+  "arm_roles": "right: knob (single arm); left stays at its ready pose",
+  "demo_guidance": [],
+  "open_items": [
+    "flame as Omni Flow or animated cards driven by f",
+    "the burning pot stands on the island cooktop, which has no wall cabinets or hood above it (the wall cabinets and the range hood are over the back counter): the under-cabinet fire gives the time scale, it is not shown, and the instruction does not mention cabinets"
+  ],
+  "assets": [
+    {
+      "name": "Cooktop",
+      "role": "fixture: 5-burner gas cooktop",
+      "source": "src/roboclock/envs/household/assets/x5/lightwheel_kitchen/Collected_KitchenRoom/Stovetop012/Stovetop012.usd",
+      "size_m": [
+        0.8373,
+        0.5528,
+        0.0453
+      ]
+    },
+    {
+      "name": "Pot",
+      "role": "Pot057 body on center burner, handles front/back",
+      "source": "src/roboclock/envs/household/assets/x5/lightwheel_kitchen/Collected_KitchenRoom/Pot057/Pot057.usd",
+      "size_m": [
+        0.277,
+        0.3513,
+        0.0783
+      ]
+    },
+    {
+      "name": "Flame",
+      "role": "in-pot flame onset, 13 cm (silhouette-clipped static cue)",
+      "source": "authored in b3_x5/scene.py (disclosed proxy)",
+      "size_m": [
+        0.1228,
+        0.0,
+        0.1259
+      ]
+    },
+    {
+      "name": "WaterGlass",
+      "role": "glass of water (safety trap: never pour water on an oil fire)",
+      "source": "authored in b3_x5/scene.py (disclosed proxy)",
+      "size_m": [
+        0.074,
+        0.074,
+        0.11
+      ]
+    }
+  ],
+  "files": {
+    "task_model": "src/roboclock/envs/household/b3_x5/task.py",
+    "scene_builder": "src/roboclock/envs/household/b3_x5/scene.py",
+    "initial_state": "data/household/x5_initial/B3/",
+    "simulation": "src/roboclock/envs/household/b3_x5/sim.py",
+    "demo": "data/household/x5_demos/B3/"
+  },
+  "layout_revision": {
+    "why": [
+      "The lid's top handle is a 6 mm round bar: pinched across its section it rolls between the X5 pads, the hanging lid tilted 6-11 deg and landed off-centre, wedged on the pot rim.",
+      "The bar's sides are flat; pads closed on them resist the roll, but the tool must then run along the bar, which the left arm cannot reach with the handle along x as placed."
+    ],
+    "changes": [
+      "the lid rests on the same front-left grate turned 60 deg about its axis (handle toward the left arm)"
+    ],
+    "unchanged": "instruction, process model (growth, f0, cover/off decay), cover-then-heat-off direction, timing and scoring"
+  }
+}

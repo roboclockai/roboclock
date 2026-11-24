@@ -1,0 +1,162 @@
+{
+  "task_id": 46,
+  "embodiment": "dual_arx_x5",
+  "seed": 0,
+  "release_x_m": 0.82,
+  "lane_y_m": 0.91,
+  "gate_release_s": 8.0,
+  "mass_scale": 1.0,
+  "dynamic_friction": 0.25,
+  "bounds": {
+    "release_x_m": [
+      0.815,
+      0.825
+    ],
+    "lane_y_m": [
+      0.908,
+      0.912
+    ],
+    "gate_release_s": [
+      7,
+      9
+    ],
+    "mass_scale": [
+      0.9,
+      1.1
+    ],
+    "dynamic_friction": [
+      0.23,
+      0.27
+    ],
+    "machine_outfeed_source_x_m": [
+      -1.705,
+      -1.695
+    ],
+    "machine_outfeed_surface_speed_m_s": [
+      0.33,
+      0.37
+    ]
+  },
+  "randomization": {
+    "layout": false,
+    "timing": false,
+    "physical": false
+  },
+  "zone_x_m": [
+    0.9,
+    1.2
+  ],
+  "response_deadline_s": 3.0,
+  "physics_hz": 250,
+  "bearing_collision_method": "sdf",
+  "bearing_sdf_resolution": 1024,
+  "capture_above_reference_center_m": 0.042,
+  "capture_close_rate_m_s": 0.028,
+  "capture_minimum_command_m": 0.0002,
+  "brake_yaw_deg": 0.0,
+  "recovery_keep_pickup_orientation": true,
+  "recovery_output_pitch_deg": 75.0,
+  "arrest_policy": "Post-entry contact-stable stop in any supported orientation within3s; at least one original right fingertip mechanically brakes against native lane support. Right-arm braking remains continuous while left-arm outer-race grasp establishes strong bilateral pickup before brake withdrawal, free lift and recovery.",
+  "recovery_preparation": "two_arm_continuous_brake_outer_race_handoff",
+  "handoff": {
+    "pickup_pitch_deg": 30.0,
+    "approach_from_bore_deg": -12.15,
+    "approach_yaw_max_deg": 72.0,
+    "pickup_above_center_m": 0.025,
+    "bore_horizontal_offset_m": 0.006,
+    "right_park_yaw_deg": 60.0,
+    "policy": "Side entry above intact chute guides; continuous right brake until measured strong left outer-race grasp, narrow vertical brake withdrawal then clear park."
+  },
+  "stop_minimum_each_finger_N": 0.2,
+  "tracked_regrasp": {
+    "preopen_travel_m": 0.01,
+    "open_travel_m": 0.016,
+    "clear_height_m": 0.05,
+    "grip_height_m": 0.042,
+    "prediction_s": 0.05,
+    "maximum_predict_speed_m_s": 0.4,
+    "motion_command_speed_m_s": 0.25,
+    "alignment_m": 0.002,
+    "minimum_pickup_finger_N": 10.0
+  },
+  "capture_geometry": "Original fingertip reach and42mm reference height target the original outer race. Actual failedSDF trace/FK has submicrometer tool agreement and shows fingers remain axially outside the part during interception;28mm/s closure is below the38mm/s native cap and compensates observed closing delay. Native contact/penetration checks remain required.",
+  "arrest_dwell_s": 0.15,
+  "tray_retention_stability": {
+    "dwell_s": 0.5,
+    "position_span_m": 0.0002,
+    "orientation_from_first_deg": 0.5,
+    "scope": "Free released bearing remains on the actual tray floor, inside its complete usable region and without hand contact throughout a measured0.5s pose window. Actual pose variation is evaluated directly, separately from the unchanged arrest/lift windows; raw constraint-step velocities remain logged."
+  },
+  "minimum_arrest_finger_N": 10.0,
+  "holding_close_rate_m_s": 0.004,
+  "recovery_orientation_rate_rad_s": 0.15,
+  "preparation_orientation_rate_rad_s": 0.3,
+  "recovery_output_yaw_deg": 105.0,
+  "recovery_target_xy_m": [
+    0.87,
+    0.67
+  ],
+  "recovery_tray_center_m": [
+    0.85,
+    0.6775,
+    0.9075
+  ],
+  "recovery_tray_yaw_deg": 0.0,
+  "recovery_tray_size_m": [
+    0.23,
+    0.235,
+    0.04
+  ],
+  "recovery_tray_inner_bounds_xy_m": [
+    [
+      0.75225,
+      0.595
+    ],
+    [
+      0.94775,
+      0.76
+    ]
+  ],
+  "recovery_control": "Continue bounded closing toward source20N native effort cap during loaded motion, instead of freezing a contact-onset position target. Original0.04m/s and all geometry/deadlines retained.",
+  "arrest_linear_speed_m_s": 0.02,
+  "arrest_angular_speed_rad_s": 0.2,
+  "arrest_pose_stability": {
+    "position_span_m": 0.0002,
+    "orientation_from_first_deg": 0.2,
+    "scope": "Continuous measured pose window with native lane support and at least one real braking fingertip contact; separate strong bilateral left-hand pickup remains mandatory. Raw contact-step velocities are logged diagnostics, not zero-motion claims."
+  },
+  "retained_grasp": {
+    "center_to_tool_bound_m": 0.05,
+    "minimum_each_finger_N": 0.2,
+    "loss_dwell_s": 0.2,
+    "provenance": "Original35mm bearing radius + original12.57mm fingertip reach + contact/edge clearance. A round bearing may pivot/settle along the original fingers; native bilateral contacts and whole-part lift/retention remain required."
+  },
+  "slope_deg": 8.2,
+  "runtime_joint_velocity_limit_rad_s": 0.73,
+  "runtime_finger_velocity_limit_m_s": 0.038,
+  "machine_outfeed": {
+    "enabled": true,
+    "source_x_m": -1.7,
+    "belt_start_x_m": -1.82,
+    "junction_x_m": 0.78,
+    "surface_speed_m_s": 0.35,
+    "arrival_dwell_s": 0.5,
+    "scope": "Original free bearing transports from the supplied left machine opening on a native conveyor, settles at the native metering gate, then rolls into the unchanged safety/capture zone. No product writes after reset."
+  },
+  "assumptions": "Candidate0.35kg bearing/friction and original8.2deg gravity lane. Native lifting upstream gate sets release time; no product pose/velocity writes after reset. Camera/quality limits are demo settings, not certified safety limits.",
+  "scoring": "Measured leading-edge zone entry to native stable arrest wholly inside safety zone within3s; separate released whole-bearing tray retention.",
+  "bearing_contact_offset_m": 0.002,
+  "static_contact_offset_m": 0.002,
+  "bearing_max_depenetration_m_s": 0.3,
+  "recovery_cradle": {
+    "center_xy_m": [
+      0.87,
+      0.672
+    ],
+    "inner_half_gap_m": 0.008,
+    "rail_width_m": 0.006,
+    "rail_height_m": 0.0015,
+    "rail_length_m": 0.07
+  },
+  "sha256": "edbd17461f62a7835c5f90cc1f1c9f436c612dd0844bf600ce011ab222703e9a"
+}

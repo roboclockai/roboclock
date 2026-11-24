@@ -1,0 +1,24 @@
+# Shared Industry settings. Every task runs physics at robodojo_rig.PHYSICS_HZ (250 Hz);
+# the per-task rates below must equal it, and the environment rejects a scene built at
+# any other rate.
+sim:
+  physics_dt: 0.004                  # 250 Hz (default task B2)
+  control_dt: 0.02                   # 50 Hz control for every task
+  render_subframes: 2                # RTX subframes per observation render
+  no_render: false                   # robodojo_rig spec: true = no cameras, no render calls
+# Cameras, physics rate and renderer come from roboclock.envs.robodojo_rig (no local copies).
+# A/B episode budgets and temporal requirements are per difficulty level
+# (configs/difficulty.yaml); C episodes run to their horizon H = 5 t_o at every level
+# (docs/c-class-timing.md). tasks.<ID>.max_time, if set here, overrides the episode length
+# for short debugging runs; it never changes how an episode is judged.
+tasks:
+  A1: {physics_hz: 250}
+  A2: {physics_hz: 250}
+  A3: {physics_hz: 250}
+  B1: {physics_hz: 250}
+  B2: {physics_hz: 250}
+  B3: {physics_hz: 250}
+  C1: {physics_hz: 250}
+  C2: {physics_hz: 250}
+  C3: {physics_hz: 250}
+  C4: {physics_hz: 250}

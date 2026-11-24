@@ -1,0 +1,85 @@
+{
+  "id": "B2",
+  "embodiment": "Dual ARX X5, stationary island mount (common rig: bases side by side at x=0.00 / 0.60 m, y=-0.255 m, 0.60 m apart, facing +y; RoboDojo head camera 0.04 m forward of the base midpoint, 0.543 m above the mount tops, 60 deg down, Gemini 345Lg 640x480; D435 wrist cameras on link6); ready pose q=[0, .94, 1.34, -1.40, 0, 0]",
+  "time_origin": "t=0 at the first agent observation; process and physics continue during agent deliberation",
+  "interface": "Agent/LLM action and observation interface intentionally undefined in this revision; see README",
+  "revision": "R3 (2026-11-02): replaces the smoking-toaster task",
+  "status": "design + initial scene + task/scoring model + Isaac Sim physics episode with a privileged oracle, validated from the trajectory, recorded",
+  "title": "Catch the object rolling off the counter",
+  "category": "B event-reactive",
+  "household_need": "An egg, apple, pill bottle or cup rolling to the edge of a counter breaks or spills within a second or two of starting to move.",
+  "instruction": "Something may roll off the counter. Catch it before it falls, and hold on to it: bring it to rest before its centre passes the counter's edge on the robot's side, then lift it at least 1.5 cm off the counter between both jaws of one gripper and keep it there for 1 second. Hold it gently: more than 30 N on a jaw crushes it. The other objects must stay where they are (within 1 cm).",
+  "core_interventions": [
+    "see which object moved",
+    "predict where it will cross the hand's reach",
+    "put the open gripper in its path, stop it, close, lift"
+  ],
+  "process": {
+    "state": "rigid-body motion only (no symbolic process)",
+    "model": "gravity on a wedge board, then rolling across the level counter; PhysX friction, angular damping 0.12 /s for rolling resistance",
+    "hidden": {
+      "release_time_s": "U[1, 3]",
+      "target": "uniform over cup, egg, pill_bottle, apple"
+    },
+    "nominal": {
+      "release_time_s": 2.0,
+      "target": "egg",
+      "board_deg": "6 x time_scale: 4.5 / 6 / 9"
+    },
+    "cue": "the peg under one object sinks and that object starts to roll (agent camera)"
+  },
+  "timing": {
+    "event": "stopped: speed < 0.03 m/s for 0.2 s, short of the edge",
+    "rule": "the physics sets the deadline: past the counter edge the object falls"
+  },
+  "completion": {
+    "physical": [
+      "held by both jaws, clear of the counter, for 1 s",
+      "never fell",
+      "jaw contact <= 30 N",
+      "other objects moved <= 1 cm"
+    ],
+    "temporal": "stopped before crossing the edge"
+  },
+  "failures": [
+    "object fell",
+    "object crushed",
+    "a different object knocked"
+  ],
+  "permitted": [
+    "either arm",
+    "stopping the object with any part of the hand first"
+  ],
+  "prohibited": [],
+  "arm_roles": "left: catch (the right arm cannot reach the catch poses); right: clears the camera's view",
+  "layout": {
+    "heading_deg": 240,
+    "catch_line_y": -0.315,
+    "edge_y": -0.38,
+    "why_diagonal": "the X5 wrist cannot point the hand straight back at +y from beyond its own base; azimuth 60 deg is reachable with 0.6-1 rad of joint margin"
+  },
+  "object_sizes": "chosen for the 60.3 mm jaw opening: egg 44, pill bottle 41, cup 50, apple 52 mm across. A real 75 mm apple or a 70 mm cup does not fit this gripper.",
+  "history": "A rolling-can interception was dropped from B2 earlier because a nudged can reaches the edge too fast for an LLM in the loop. That still holds: with hard at about 1.2 s and the arm taking 0.8 s, only a fast policy can succeed. This revision restores the idea on request, as a dynamic tracking test.",
+  "open_items": [
+    "the peg is a scripted disturbance",
+    "the egg's ovoid collider rolls with some drift but does not precess like a real egg",
+    "no breakage model beyond the contact-force limit"
+  ],
+  "assets": [
+    {
+      "name": "Board",
+      "role": "wedge cutting board",
+      "source": "authored in b2_x5/scene.py"
+    },
+    {
+      "name": "Cup, Egg, PillBottle, Apple",
+      "role": "rollable objects",
+      "source": "authored in b2_x5/scene.py (surfaces of revolution)"
+    }
+  ],
+  "files": {
+    "task": "task.py",
+    "scene": "scene.py",
+    "physics": "sim.py"
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "task_id": 47,
+  "embodiment": "dual_arx_x5",
+  "seed": 0,
+  "source_xy_jitter_m": [
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ]
+  ],
+  "start_s": 1.0,
+  "mass_scale": 1.0,
+  "budget_s": 90.0,
+  "physics_hz": 250,
+  "runtime_joint_velocity_limit_rad_s": 0.73,
+  "kit_floor_m": 1.0475,
+  "placement_stability": {
+    "dwell_s": 0.3,
+    "position_span_m": 0.0002,
+    "orientation_from_first_deg": 0.2,
+    "scope": "Continuous measured native pose and original insert-floor support after full release. Raw constraint-step velocities remain diagnostics."
+  },
+  "kit_bounds_xy_m": [
+    [
+      -0.18,
+      0.11
+    ],
+    [
+      0.18,
+      0.33
+    ]
+  ],
+  "required_delivered_kits": 0,
+  "bounds": {
+    "source_xy_jitter_m": [
+      -0.001,
+      0.001
+    ],
+    "start_s": [
+      1,
+      2
+    ],
+    "mass_scale": [
+      0.9,
+      1.1
+    ]
+  },
+  "randomization": {
+    "layout": false,
+    "timing": false,
+    "physical": false
+  },
+  "scope": "Two fixed-workcell kits, both arms independently pack one bearing, bracket and pin into original case inserts. No mobile delivery required, per review, October22.",
+  "controller": "Privileged native state/contact bounded joint-drive oracle",
+  "required_completed_kits": 2,
+  "mobile_base_required": false,
+  "kit_centers_x_m": [
+    0.66,
+    -0.66
+  ],
+  "fixed_mounts_m": {
+    "left": [
+      -0.3,
+      0.2,
+      1.1
+    ],
+    "right": [
+      0.3,
+      0.2,
+      1.1
+    ]
+  },
+  "source_x_m": [
+    [
+      0.22,
+      0.38,
+      0.54
+    ],
+    [
+      -0.22,
+      -0.38,
+      -0.54
+    ]
+  ],
+  "kit_sides": [
+    "right",
+    "left"
+  ],
+  "source_y_m": [
+    0.68,
+    0.68,
+    0.6
+  ],
+  "grasp_minimum_per_jaw_N": {
+    "bearing": 2.4,
+    "bracket": 3.0,
+    "pin": 0.2
+  },
+  "gripper_stiffness_N_m": {
+    "bearing": 1500,
+    "bracket": 1500,
+    "pin": 1500
+  },
+  "bracket_tool_offset_m": [
+    0.0235,
+    0,
+    0.012
+  ],
+  "bracket_tool_yaw_deg": {
+    "left": 180,
+    "right": 0
+  },
+  "tool_rotation_rate_rad_s": 0.4,
+  "bracket_lateral_normal_cos_min": 0.8,
+  "probe_component_index": 0,
+  "sha256": "7d61e4f2868bf59db95c3f5fc1adb5eccc311fc3f9a33d0e375ecd8ba09f3f4e"
+}

@@ -1,0 +1,44 @@
+# Unified evaluation runtime for the ten current Dual ARX X5 sports tasks
+# (roboclock eval --env sports). Each task keeps its own scene, physics and
+# scoring; this file only fixes the shared observation and lists the rates.
+sim:
+  # Rates of the active task: reset() replaces them with the values under tasks.
+  physics_dt: 0.004
+  control_decimation: 5
+  # Policy cameras: the RoboDojo rig (roboclock/envs/robodojo_rig.py, rig_cameras.py),
+  # head rgb + left/right wrist, 640x480 each, rendered when a policy reads an observation.
+  # This resolution is only the task's presentation camera, which evaluation builds
+  # but never renders; recordings write it at 1280x960.
+  camera_resolution: [640, 480]
+  # true: physics and oracle only. No camera is built, nothing is rendered and every
+  # image key is a zero image of the same shape (configs/no_render.yaml).
+  no_render: false
+observation:
+  # Renderer updates and RTX subframes per observation; physics never advances.
+  render_updates: 1
+  rt_subframes: 1
+visuals:
+  renderer: RaytracedLighting
+# Print one progress line per this many simulated seconds (0 disables).
+progress_seconds: 10
+robot:
+  model: dual_arx_x5
+  joint_order: left_joint1..8 then right_joint1..8 (arm radians, finger meters)
+  # Apply the manufacturer URDF finger speed (0.15 m/s) in SI units at reset. The
+  # converted USD stores it as 8.594 (deg/s conversion): Isaac Sim 6.2.0 (the
+  # recordings) applied 0.15 m/s, Isaac Sim 6.0.1 applies 8.594 m/s.
+  enforce_urdf_finger_velocity: true
+# Physics/control rates (result.json physics_hz/control_hz). RoboDojo spec: physics
+# exactly 250 Hz in every task (multiples are refused), control 50 Hz.
+# The sub-package configurations are checked against them at reset.
+tasks:
+  A1: {physics_hz: 250, control_hz: 50}
+  A2: {physics_hz: 250, control_hz: 50}
+  B1: {physics_hz: 250, control_hz: 50}
+  B2: {physics_hz: 250, control_hz: 50}
+  B3: {physics_hz: 250, control_hz: 50}
+  B4: {physics_hz: 250, control_hz: 50}
+  B5: {physics_hz: 250, control_hz: 50}
+  C1: {physics_hz: 250, control_hz: 50}
+  C2: {physics_hz: 250, control_hz: 50}
+  C3: {physics_hz: 250, control_hz: 50}

@@ -1,0 +1,207 @@
+sim:
+  physics_dt: 0.004
+  control_decimation: 5
+  camera_resolution:
+  - 960
+  - 720
+  settle_seconds: 0.5
+  placement_dwell: 0.2
+scene:
+  table_height: 0.75
+  table_center:
+  - 0.45
+  - 0.0
+  - 0.7
+  table_size:
+  - 1.0
+  - 1.1
+  - 0.1
+  robot_position:
+  - 0.0
+  - 0.0
+  - 0.75
+  camera_position:
+  - 1.45
+  - 1.25
+  - 1.95
+  camera_look_at:
+  - 0.43
+  - 0
+  - 0.98
+  camera_focal_length: 21.0
+  camera_horizontal_aperture: 36.0
+  spatial_jitter: 0.012
+  clutter:
+    enabled: false
+    count: 10
+    seed_offset: 202
+    source_clearance: 0.045
+    target_clearance: 0.045
+    pair_clearance: 0.012
+  mass_range:
+  - 0.04
+  - 0.07
+  friction_range:
+  - 0.7
+  - 0.9
+  light_intensity_range:
+  - 1800
+  - 2600
+visuals:
+  hdr_path: shared://hdr/studio_small_09_2k.hdr
+  hdr_intensity: 180.0
+  hdr_rotation: 35.0
+  key_intensity: 420.0
+  fill_intensity: 90.0
+  labels: true
+  renderer: RaytracedLighting
+  path_tracing_samples: 512
+  path_tracing_spp: 8
+  path_tracing_bounces: 8
+  render_updates: 72
+  materials:
+    worktop:
+      texture_set: epoxy
+      uv_scale:
+      - 1.0
+      - 1.0
+      normal_strength: 0.18
+      roughness_map_weight: 0.5
+    steel:
+      texture_set: brushed_steel
+      uv_scale:
+      - 2.0
+      - 2.0
+      normal_strength: 0.2
+      roughness_map_weight: 0.65
+    aluminum:
+      texture_set: brushed_steel
+      uv_scale:
+      - 3.0
+      - 3.0
+      normal_strength: 0.15
+      roughness_map_weight: 0.45
+    polymer:
+      texture_set: powder_coat
+      uv_scale:
+      - 2.0
+      - 2.0
+      normal_strength: 0.18
+      roughness_map_weight: 0.5
+    wall:
+      texture_set: painted_plaster_wall
+      uv_scale:
+      - 0.5
+      - 0.5
+      normal_strength: 0.15
+      roughness_map_weight: 0.6
+      tint:
+      - 0.84
+      - 0.91
+      - 0.98
+    floor:
+      texture_set: grey_tiles
+      uv_scale:
+      - 0.75
+      - 0.75
+      normal_strength: 0.15
+      roughness_map_weight: 0.7
+physics:
+  contact_offset: 0.001
+  rest_offset: 0.0
+  solver_position_iterations: 16
+  solver_velocity_iterations: 4
+  minimum_grasp_time: 0.04
+  contact_force_threshold: 0.06
+  relative_hold_speed: 0.2
+  recovery_dwell: 0.3
+  catch_dwell: 0.25
+control:
+  max_cartesian_speed: 0.35
+  insertion_speed: 0.07
+  reactive_speed: 0.65
+  joint_target_speed: 2.0
+  phase_timeout: 10.0
+difficulty:
+  easy:
+    window_width:
+    - 20.0
+    - 24.0
+    reaction_latency:
+    - 18.0
+    - 22.0
+    transfer_deadline:
+    - 26.0
+    - 30.0
+    required_rate:
+    - 0.015
+    - 0.015
+    position_tolerance: 0.025
+    orientation_tolerance: 0.3
+  medium:
+    window_width:
+    - 10.0
+    - 14.0
+    reaction_latency:
+    - 12.0
+    - 16.0
+    transfer_deadline:
+    - 18.0
+    - 22.0
+    required_rate:
+    - 0.03
+    - 0.03
+    position_tolerance: 0.018
+    orientation_tolerance: 0.2
+  hard:
+    window_width:
+    - 5.0
+    - 7.0
+    reaction_latency:
+    - 7.0
+    - 10.0
+    transfer_deadline:
+    - 12.0
+    - 15.0
+    required_rate:
+    - 0.05
+    - 0.05
+    position_tolerance: 0.012
+    orientation_tolerance: 0.12
+episode:
+  window_start_range:
+  - 14.0
+  - 16.0
+  event_time_range:
+  - 5.0
+  - 7.0
+  num_samples_range:
+  - 3
+  - 3
+  required_accuracy: 1.0
+  max_time: 60.0
+# Dual-X5 household runtime (roboclock.envs.household.x5.env:HouseholdX5Env, `roboclock eval --env
+# household`). Rates match the recorded episodes in data/household/x5_demos (physics 250 Hz,
+# joint-position control 50 Hz, 3 s passive settling before t = 0, process cues every 10 ticks).
+# The sections above are the legacy schema of the earlier task-specific recorders.
+x5:
+  physics_dt: 0.004
+  control_decimation: 5
+  settle_seconds: 3.0
+  cue_interval_ticks: 10
+  # Policy cameras and renderer: the RoboDojo rig spec (roboclock.envs.robodojo_rig). Head camera
+  # /World/AgentCamera (rgb) and one wrist camera per arm on link6 (left_wrist_rgb,
+  # right_wrist_rgb), all 640x480, rendered on read with RaytracedLighting + DLAA.
+  camera: /World/AgentCamera
+  camera_resolution:
+  - 640
+  - 480
+  # true: no cameras, no render calls; observations carry zero images of the same shapes
+  # (configs/no_render.yaml, for headless oracle iteration).
+  no_render: false
+  # Per-environment scene files (initial scene built in code + physics overlay). null: a
+  # temporary folder under <repo>/results/household (git-ignored), removed on close().
+  scene_dir: null
+  # true: the recorder's video mode (Fabric off, physics results written to USD). Outcomes
+  # were identical either way in a C3 check; off is faster.
+  physics_to_usd: false

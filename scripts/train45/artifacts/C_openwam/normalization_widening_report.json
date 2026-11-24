@@ -1,0 +1,463 @@
+{
+ "stats_file": "$TRAIN45_DIR/data/RoboDojo/meta/robodojo_normalization_stats.npy",
+ "sha256": "941d2ca95973c3f0ead4d9948b6a710b0cc84ee2c3b815ee5c090d06a50a7af2",
+ "release_file": "$MODELS_DIR/OpenWAM-Alpha-Sim-RoboDojo/normalization_stats.npy",
+ "release_sha256": "48bc266e0390f341c86dc3712501788c2bfdb75e44f005e41cc3e5820ace36a3",
+ "farm": "$TRAIN45_DIR/data/RoboDojo",
+ "rule": "release eef stats; min/max = elementwise union of release and ours; everything else from the release",
+ "ours": {
+  "tasks": [
+   "hospital_A1",
+   "hospital_A2",
+   "hospital_B1",
+   "hospital_B2",
+   "hospital_B3",
+   "hospital_B4",
+   "hospital_B5",
+   "hospital_B6",
+   "hospital_C1",
+   "hospital_C2",
+   "hospital_C3",
+   "household_A1",
+   "household_A2",
+   "household_A4",
+   "household_B2",
+   "household_B3",
+   "household_C1",
+   "household_C3",
+   "industry_A1",
+   "industry_A2",
+   "industry_B1",
+   "industry_B3",
+   "industry_C1",
+   "industry_C2",
+   "industry_C3",
+   "lab_A1",
+   "lab_A2",
+   "lab_A3",
+   "lab_A4",
+   "lab_A5",
+   "lab_B1",
+   "lab_B2",
+   "lab_B3",
+   "lab_B4",
+   "lab_B6",
+   "lab_B7",
+   "lab_C1",
+   "lab_C2",
+   "sports_A1",
+   "sports_A2",
+   "sports_B1",
+   "sports_B3",
+   "sports_B4",
+   "sports_C1",
+   "sports_C2"
+  ],
+  "state_rows": 610098,
+  "action_rows": 609488
+ },
+ "rot6d_dims_identity": [
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18
+ ],
+ "widened": [
+  "left_x",
+  "left_y",
+  "left_z",
+  "right_x",
+  "right_y",
+  "right_z"
+ ],
+ "dims": [
+  {
+   "dim": 0,
+   "name": "left_x",
+   "release": [
+    0.020513009279966354,
+    0.5669864416122437
+   ],
+   "ours": [
+    -0.14994202554225922,
+    0.498678058385849
+   ],
+   "merged": [
+    -0.14994202554225922,
+    0.5669864416122437
+   ],
+   "widened_low": 0.17045503854751587,
+   "widened_high": 0.0,
+   "range_growth": 0.3119182586669922
+  },
+  {
+   "dim": 1,
+   "name": "left_y",
+   "release": [
+    -0.4601609706878662,
+    0.25595414638519287
+   ],
+   "ours": [
+    -0.45354193449020386,
+    0.47693902254104614
+   ],
+   "merged": [
+    -0.4601609706878662,
+    0.47693902254104614
+   ],
+   "widened_low": 0.0,
+   "widened_high": 0.22098487615585327,
+   "range_growth": 0.30858850479125977
+  },
+  {
+   "dim": 2,
+   "name": "left_z",
+   "release": [
+    0.030162498354911804,
+    0.5622349977493286
+   ],
+   "ours": [
+    -0.14008866250514984,
+    0.5055371522903442
+   ],
+   "merged": [
+    -0.14008866250514984,
+    0.5622349977493286
+   ],
+   "widened_low": 0.17025116086006165,
+   "widened_high": 0.0,
+   "range_growth": 0.31997740268707275
+  },
+  {
+   "dim": 3,
+   "name": "left_rot6d_0",
+   "release": [
+    -1.0,
+    1.0
+   ],
+   "ours": [
+    -1.0,
+    1.0
+   ],
+   "merged": [
+    -1.0,
+    1.0
+   ],
+   "widened_low": 0.0,
+   "widened_high": 0.0,
+   "range_growth": 0.0
+  },
+  {
+   "dim": 4,
+   "name": "left_rot6d_1",
+   "release": [
+    -1.0,
+    1.0
+   ],
+   "ours": [
+    -1.0,
+    1.0
+   ],
+   "merged": [
+    -1.0,
+    1.0
+   ],
+   "widened_low": 0.0,
+   "widened_high": 0.0,
+   "range_growth": 0.0
+  },
+  {
+   "dim": 5,
+   "name": "left_rot6d_2",
+   "release": [
+    -1.0,
+    1.0
+   ],
+   "ours": [
+    -1.0,
+    1.0
+   ],
+   "merged": [
+    -1.0,
+    1.0
+   ],
+   "widened_low": 0.0,
+   "widened_high": 0.0,
+   "range_growth": 0.0
+  },
+  {
+   "dim": 6,
+   "name": "left_rot6d_3",
+   "release": [
+    -1.0,
+    1.0
+   ],
+   "ours": [
+    -1.0,
+    1.0
+   ],
+   "merged": [
+    -1.0,
+    1.0
+   ],
+   "widened_low": 0.0,
+   "widened_high": 0.0,
+   "range_growth": 0.0
+  },
+  {
+   "dim": 7,
+   "name": "left_rot6d_4",
+   "release": [
+    -1.0,
+    1.0
+   ],
+   "ours": [
+    -1.0,
+    1.0
+   ],
+   "merged": [
+    -1.0,
+    1.0
+   ],
+   "widened_low": 0.0,
+   "widened_high": 0.0,
+   "range_growth": 0.0
+  },
+  {
+   "dim": 8,
+   "name": "left_rot6d_5",
+   "release": [
+    -1.0,
+    1.0
+   ],
+   "ours": [
+    -1.0,
+    1.0
+   ],
+   "merged": [
+    -1.0,
+    1.0
+   ],
+   "widened_low": 0.0,
+   "widened_high": 0.0,
+   "range_growth": 0.0
+  },
+  {
+   "dim": 9,
+   "name": "left_gripper",
+   "release": [
+    0.0,
+    1.0
+   ],
+   "ours": [
+    0.0,
+    1.0
+   ],
+   "merged": [
+    0.0,
+    1.0
+   ],
+   "widened_low": 0.0,
+   "widened_high": 0.0,
+   "range_growth": 0.0
+  },
+  {
+   "dim": 10,
+   "name": "right_x",
+   "release": [
+    0.01822982355952263,
+    0.552478015422821
+   ],
+   "ours": [
+    -0.05055420473217964,
+    0.4988558292388916
+   ],
+   "merged": [
+    -0.05055420473217964,
+    0.552478015422821
+   ],
+   "widened_low": 0.06878402829170227,
+   "widened_high": 0.0,
+   "range_growth": 0.12874925136566162
+  },
+  {
+   "dim": 11,
+   "name": "right_y",
+   "release": [
+    -0.27511560916900635,
+    0.4533117115497589
+   ],
+   "ours": [
+    -0.4769558012485504,
+    0.42363491654396057
+   ],
+   "merged": [
+    -0.4769558012485504,
+    0.4533117115497589
+   ],
+   "widened_low": 0.20184019207954407,
+   "widened_high": 0.0,
+   "range_growth": 0.2770904302597046
+  },
+  {
+   "dim": 12,
+   "name": "right_z",
+   "release": [
+    0.029594585299491882,
+    0.5642424821853638
+   ],
+   "ours": [
+    -0.19668474793434143,
+    0.5207927823066711
+   ],
+   "merged": [
+    -0.19668474793434143,
+    0.5642424821853638
+   ],
+   "widened_low": 0.2262793332338333,
+   "widened_high": 0.0,
+   "range_growth": 0.42323052883148193
+  },
+  {
+   "dim": 13,
+   "name": "right_rot6d_0",
+   "release": [
+    -1.0,
+    1.0
+   ],
+   "ours": [
+    -1.0,
+    1.0
+   ],
+   "merged": [
+    -1.0,
+    1.0
+   ],
+   "widened_low": 0.0,
+   "widened_high": 0.0,
+   "range_growth": 0.0
+  },
+  {
+   "dim": 14,
+   "name": "right_rot6d_1",
+   "release": [
+    -1.0,
+    1.0
+   ],
+   "ours": [
+    -1.0,
+    1.0
+   ],
+   "merged": [
+    -1.0,
+    1.0
+   ],
+   "widened_low": 0.0,
+   "widened_high": 0.0,
+   "range_growth": 0.0
+  },
+  {
+   "dim": 15,
+   "name": "right_rot6d_2",
+   "release": [
+    -1.0,
+    1.0
+   ],
+   "ours": [
+    -1.0,
+    1.0
+   ],
+   "merged": [
+    -1.0,
+    1.0
+   ],
+   "widened_low": 0.0,
+   "widened_high": 0.0,
+   "range_growth": 0.0
+  },
+  {
+   "dim": 16,
+   "name": "right_rot6d_3",
+   "release": [
+    -1.0,
+    1.0
+   ],
+   "ours": [
+    -1.0,
+    1.0
+   ],
+   "merged": [
+    -1.0,
+    1.0
+   ],
+   "widened_low": 0.0,
+   "widened_high": 0.0,
+   "range_growth": 0.0
+  },
+  {
+   "dim": 17,
+   "name": "right_rot6d_4",
+   "release": [
+    -1.0,
+    1.0
+   ],
+   "ours": [
+    -1.0,
+    1.0
+   ],
+   "merged": [
+    -1.0,
+    1.0
+   ],
+   "widened_low": 0.0,
+   "widened_high": 0.0,
+   "range_growth": 0.0
+  },
+  {
+   "dim": 18,
+   "name": "right_rot6d_5",
+   "release": [
+    -1.0,
+    1.0
+   ],
+   "ours": [
+    -1.0,
+    1.0
+   ],
+   "merged": [
+    -1.0,
+    1.0
+   ],
+   "widened_low": 0.0,
+   "widened_high": 0.0,
+   "range_growth": 0.0
+  },
+  {
+   "dim": 19,
+   "name": "right_gripper",
+   "release": [
+    0.0,
+    1.0
+   ],
+   "ours": [
+    0.0,
+    1.0
+   ],
+   "merged": [
+    0.0,
+    1.0
+   ],
+   "widened_low": 0.0,
+   "widened_high": 0.0,
+   "range_growth": 0.0
+  }
+ ]
+}
