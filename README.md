@@ -4,7 +4,7 @@
 
 <h2 align="center">RoboClock: A Unified Benchmark for Time-Aware Robotic Intelligence</h2>
 
-<h3 align="center"><a href="https://roboclockai.github.io">Webpage</a> | <a href="https://roboclockai.github.io/roboclock.pdf">Paper</a> | <a href="docs/usage.md">Document</a> | <a href="https://roboclockai.github.io/tasks.html">Tasks</a> | <a href="https://huggingface.co/datasets/Roboclockai/roboclock-assets">Assets</a> | <a href="https://roboclockai.github.io/#leaderboard">Leaderboard</a></h3>
+<h3 align="center"><a href="https://roboclockai.github.io">Webpage</a> | <a href="https://arxiv.org/abs/2611.32233">Paper</a> | <a href="docs/usage.md">Document</a> | <a href="https://roboclockai.github.io/tasks.html">Tasks</a> | <a href="https://huggingface.co/datasets/Roboclockai/roboclock-assets">Assets</a> | <a href="https://roboclockai.github.io/#leaderboard">Leaderboard</a></h3>
 
 <p align="center">
   <img alt="Python 3.11 | 3.12" src="https://img.shields.io/badge/Python-3.11_|_3.12-475569?style=flat-square&logo=python&logoColor=white&labelColor=64748b" height="22"/>&nbsp;
@@ -36,7 +36,7 @@ benchmarks mostly score spatial correctness and task completion. **RoboClock mea
 
 ## News
 
-- **November 2026** — Released the [RoboClock paper](https://roboclockai.github.io/roboclock.pdf), the code, the [simulation assets](https://huggingface.co/datasets/Roboclockai/roboclock-assets), and one oracle demonstration for each of the 60 tasks.
+- **November 2026** — Released the [RoboClock paper](https://arxiv.org/abs/2611.32233), the code, the [simulation assets](https://huggingface.co/datasets/Roboclockai/roboclock-assets), and one oracle demonstration for each of the 60 tasks.
 
 ## ✨ Highlights
 
@@ -172,7 +172,7 @@ Leading methods of each family on the Easy level, over all 60 tasks. Each step f
 
 </details>
 
-Success rates in %, from the [paper](https://roboclockai.github.io/roboclock.pdf). PSR = physical success, TSR = success under all temporal constraints with inference paused, LTSR = the same with inference latency charged to the environment clock. VLM agents act through the tool-augmented end-effector interface. For reference, the privileged scripted oracle reaches 99.2% joint physical and temporal success over all three difficulty levels. The full, searchable table for 30+ methods is on the [RoboClock leaderboard](https://roboclockai.github.io/#leaderboard); the chart is drawn by [`scripts/readme/leaderboard_chart.py`](scripts/readme/leaderboard_chart.py).
+Success rates in %, from the [paper](https://arxiv.org/abs/2611.32233). PSR = physical success, TSR = success under all temporal constraints with inference paused, LTSR = the same with inference latency charged to the environment clock. VLM agents act through the tool-augmented end-effector interface. For reference, the privileged scripted oracle reaches 99.2% joint physical and temporal success over all three difficulty levels. The full, searchable table for 30+ methods is on the [RoboClock leaderboard](https://roboclockai.github.io/#leaderboard); the chart is drawn by [`scripts/readme/leaderboard_chart.py`](scripts/readme/leaderboard_chart.py).
 
 ## 📚 Documentation
 
